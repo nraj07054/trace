@@ -238,6 +238,9 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .install b { display: block; }
 .install span { color: var(--muted); font-size: 15px; }
 @media (max-width: 860px) { .download { grid-template-columns: 1fr; } }
+/* Coins peek in from the card's corners (the card clips them), so they never cover text. */
+.coin-a { background: var(--fun); right: -26px; top: -26px; }
+.coin-b { background: var(--travel); width: 64px; height: 64px; font-size: 28px; left: -20px; bottom: -20px; animation-delay: -3s; }
 .coin { position: absolute; width: 90px; height: 90px; border-radius: 50%; display: grid; place-items: center; font: 800 40px/1 var(--display); color: #fff; opacity: .9; animation: bob 6s ease-in-out infinite; }
 
 footer { padding-block: 48px 64px; color: var(--faint); font-size: 14px; }
@@ -436,8 +439,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   <section id="download">
     <div class="wrap">
       <div class="download">
-        <span class="coin" style="background:var(--fun);left:38%;top:7%" aria-hidden="true">₹</span>
-        <span class="coin" style="background:var(--travel);width:56px;height:56px;font-size:26px;left:4%;bottom:5%;animation-delay:-3s" aria-hidden="true">₹</span>
+        <span class="coin coin-a" aria-hidden="true">₹</span>
+        <span class="coin coin-b" aria-hidden="true">₹</span>
         <div>
           <h2>Get Trace<span class="dot">.</span></h2>
           <p class="lede">Trace isn't on the Play Store yet, so you install the APK directly. It takes about a minute.</p>
