@@ -243,6 +243,26 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .coin-b { background: var(--travel); width: 64px; height: 64px; font-size: 28px; left: -20px; bottom: -20px; animation-delay: -3s; }
 .coin { position: absolute; width: 90px; height: 90px; border-radius: 50%; display: grid; place-items: center; font: 800 40px/1 var(--display); color: #fff; opacity: .9; animation: bob 6s ease-in-out infinite; }
 
+/* ---------- ko-fi ---------- */
+.kofi { margin-top: 18px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; padding: 22px 26px; border-radius: 32px; border: 2px dashed var(--line); }
+.kofi-cup { position: relative; flex: none; width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; background: #FFE9DF; color: var(--food); transform: rotate(-6deg); }
+.kofi-cup svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.kofi-cup .steam { position: absolute; top: 4px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; }
+.kofi-cup .steam i { width: 3px; height: 10px; border-radius: 3px; background: var(--food); opacity: 0; animation: steam 2.4s ease-in-out infinite; }
+.kofi-cup .steam i:nth-child(2) { animation-delay: .8s; }
+.kofi-cup .steam i:nth-child(3) { animation-delay: 1.6s; }
+@keyframes steam { 0% { opacity: 0; translate: 0 6px; } 40% { opacity: .5; } 100% { opacity: 0; translate: 0 -8px; } }
+.kofi-text { flex: 1 1 260px; min-width: 0; }
+.kofi-text b { display: block; font: 800 24px/1.15 var(--display); letter-spacing: -.02em; }
+.kofi-text span { color: var(--muted); }
+.btn-kofi { background: var(--food); color: #fff; padding: 16px 22px; box-shadow: 0 10px 24px -6px rgba(255,122,69,.55); }
+.btn-kofi svg { width: 20px; height: 20px; fill: #fff; }
+.kofi .note { flex-basis: 100%; margin-top: -6px; font-size: 19px; text-align: right; transform: rotate(-1.5deg); }
+@media (max-width: 560px) { .kofi { padding: 20px; } .btn-kofi { width: 100%; justify-content: center; } .kofi .note { text-align: center; } }
+.foot-kofi { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: var(--fill); color: var(--muted); font-weight: 700; text-decoration: none; transition: transform .35s var(--spring), color .2s; }
+.foot-kofi:hover { color: var(--food); transform: rotate(-3deg) scale(1.05); }
+.foot-kofi svg { width: 14px; height: 14px; fill: var(--food); }
+
 footer { padding-block: 48px 64px; color: var(--faint); font-size: 14px; }
 footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
 
@@ -266,6 +286,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M3 3l18 18"/></symbol>
     <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></symbol>
     <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M4 9h13v5a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6zM17 11h1.5a2.5 2.5 0 0 1 0 5H17"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.2 5 6.7 5c2.1 0 3.6 1.2 4.3 2.6h2C13.7 6.2 15.2 5 17.3 5c3.5 0 5.5 3.6 4.2 6.8C19.5 16.4 12 21 12 21z"/></symbol>
     <symbol id="i-android" viewBox="0 0 24 24"><path d="M7 10h10v7a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zM9 19v2.5M15 19v2.5M5 11v5M19 11v5M7.5 9a4.5 4.5 0 0 1 9 0M8.5 4.5l1.3 2M15.5 4.5l-1.3 2"/></symbol>
   </defs>
 </svg>
@@ -459,6 +481,18 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <li><div><b>Open Trace and allow notifications</b><span>That turns on the lock-screen shortcut.</span></div></li>
         </ol>
       </div>
+      <div class="kofi">
+        <div class="kofi-cup" aria-hidden="true"><span class="steam"><i></i><i></i><i></i></span><svg><use href="#i-cup"/></svg></div>
+        <div class="kofi-text">
+          <b>Liked Trace? Buy me a coffee<span class="dot">.</span></b>
+          <span>Trace is free, with no ads and no sign-up. A small tip on Ko-fi keeps it that way.</span>
+        </div>
+        <a class="btn btn-kofi" href="https://ko-fi.com/hey_nikhilraj" target="_blank" rel="noopener" data-goatcounter-click="kofi-card" data-goatcounter-title="Ko-fi (support card)">
+          <svg aria-hidden="true"><use href="#i-heart"/></svg>
+          Support on Ko-fi
+        </a>
+        <p class="note" aria-hidden="true">totally optional, the app stays free ♡</p>
+      </div>
     </div>
   </section>
 </main>
@@ -467,6 +501,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   <div class="wrap">
     <span class="logo" style="font-size:20px">Trace<span class="dot">.</span></span>
     <span>Every rupee leaves a trace. Made for Android.</span>
+    <a class="foot-kofi" href="https://ko-fi.com/hey_nikhilraj" target="_blank" rel="noopener" data-goatcounter-click="kofi-footer" data-goatcounter-title="Ko-fi (footer)"><svg aria-hidden="true"><use href="#i-heart"/></svg>Buy me a coffee</a>
   </div>
 </footer>
 
