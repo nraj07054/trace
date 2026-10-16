@@ -41,3 +41,10 @@ Requirements: Android SDK (platform 36) and JDK 17–21.
 ```
 
 Tech: Kotlin, Jetpack Compose (Material 3), Room. No third-party analytics or ads in the app.
+
+## License
+
+Trace is free software, licensed under the [GNU General Public License v3.0](LICENSE).
+You can use, study, change and share it; if you distribute a modified version, it must stay open source under the same licence.
+
+Copyright © 2026 Nikhil Raj
