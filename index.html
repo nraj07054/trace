@@ -243,6 +243,23 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .coin-b { background: var(--travel); width: 64px; height: 64px; font-size: 28px; left: -20px; bottom: -20px; animation-delay: -3s; }
 .coin { position: absolute; width: 90px; height: 90px; border-radius: 50%; display: grid; place-items: center; font: 800 40px/1 var(--display); color: #fff; opacity: .9; animation: bob 6s ease-in-out infinite; }
 
+/* ---------- trust: source + checksum ---------- */
+.trust { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; color: var(--faint); }
+.trust a { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 600; text-decoration: none; }
+.trust a:hover { color: var(--ink); text-decoration: underline; }
+.trust svg, .src-link svg { flex: none; width: 16px; height: 16px; fill: currentColor; }
+.verify { margin-top: 22px; background: #fff; border-radius: 22px; padding: 18px; display: grid; gap: 8px; }
+.verify-title { font-weight: 800; }
+.verify-sub { color: var(--muted); font-size: 14px; }
+.verify code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.verify-sub code { background: var(--fill); padding: 1px 6px; border-radius: 6px; font-size: 13px; }
+.hash-row { display: flex; gap: 8px; align-items: stretch; }
+.hash { flex: 1; min-width: 0; background: var(--fill); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; line-height: 1.5; word-break: break-all; user-select: all; }
+.copy { flex: none; border: 0; border-radius: 12px; background: var(--ink); color: #fff; font: 700 13px/1 var(--body); padding: 0 14px; cursor: pointer; min-height: 44px; }
+.src-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; margin-top: 4px; }
+.src-link:hover { text-decoration: underline; }
+footer a { color: var(--muted); }
+
 /* ---------- ko-fi ---------- */
 .kofi { margin-top: 18px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; padding: 22px 26px; border-radius: 32px; border: 2px dashed var(--line); }
 .kofi-cup { position: relative; flex: none; width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; background: #FFE9DF; color: var(--food); transform: rotate(-6deg); }
@@ -286,6 +303,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M3 3l18 18"/></symbol>
     <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></symbol>
     <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></symbol>
     <symbol id="i-cup" viewBox="0 0 24 24"><path d="M4 9h13v5a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6zM17 11h1.5a2.5 2.5 0 0 1 0 5H17"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.2 5 6.7 5c2.1 0 3.6 1.2 4.3 2.6h2C13.7 6.2 15.2 5 17.3 5c3.5 0 5.5 3.6 4.2 6.8C19.5 16.4 12 21 12 21z"/></symbol>
     <symbol id="i-android" viewBox="0 0 24 24"><path d="M7 10h10v7a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zM9 19v2.5M15 19v2.5M5 11v5M19 11v5M7.5 9a4.5 4.5 0 0 1 9 0M8.5 4.5l1.3 2M15.5 4.5l-1.3 2"/></symbol>
@@ -299,7 +317,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <a href="#chart">The chart</a>
       <a href="#lock">Lock screen</a>
       <a href="#categories">Categories</a>
-      <a class="btn btn-sm" href="Trace.apk" download="Trace.apk" data-goatcounter-click="download-apk-nav" data-goatcounter-title="Download APK (top bar)">Get the APK</a>
+      <a class="btn btn-sm" href="https://github.com/nraj07054/trace-app/releases/latest/download/Trace.apk" data-goatcounter-click="download-apk-nav" data-goatcounter-title="Download APK (top bar)">Get the APK</a>
     </nav>
   </div>
 </header>
@@ -315,13 +333,14 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           leaves a trace<span class="dot">.</span></h1>
         <p class="lede">A light little expense tracker for Android. Log a spend from your lock screen in about three taps, then watch the week bounce into place.</p>
         <div class="cta-row">
-          <a class="btn btn-ink" href="Trace.apk" download="Trace.apk" data-goatcounter-click="download-apk-hero" data-goatcounter-title="Download APK (hero)">
+          <a class="btn btn-ink" href="https://github.com/nraj07054/trace-app/releases/latest/download/Trace.apk" data-goatcounter-click="download-apk-hero" data-goatcounter-title="Download APK (hero)">
             <svg class="android" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-android"/></svg>
             Download APK <small>1.6 MB</small>
           </a>
           <a class="btn btn-ghost" href="#chart">Play with it first</a>
         </div>
         <p class="meta">Free · Android 8.0 or newer · No account needed</p>
+        <p class="trust"><a href="https://github.com/nraj07054/trace-app" target="_blank" rel="noopener" data-goatcounter-click="source-hero"><svg aria-hidden="true"><use href="#i-github"/></svg>Open source</a><span aria-hidden="true">·</span><a href="#verify">SHA-256 1b9ee665…cded</a></p>
       </div>
       <div class="hero-art">
         <p class="note hero-note" aria-hidden="true">the real app ↓</p>
@@ -467,12 +486,21 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <h2>Get Trace<span class="dot">.</span></h2>
           <p class="lede">Trace isn't on the Play Store yet, so you install the APK directly. It takes about a minute.</p>
           <div class="cta-row">
-            <a class="btn btn-ink" href="Trace.apk" download="Trace.apk" data-goatcounter-click="download-apk-get" data-goatcounter-title="Download APK (Get Trace section)">
+            <a class="btn btn-ink" href="https://github.com/nraj07054/trace-app/releases/latest/download/Trace.apk" data-goatcounter-click="download-apk-get" data-goatcounter-title="Download APK (Get Trace section)">
               <svg class="android" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-android"/></svg>
               Download APK <small>1.6 MB</small>
             </a>
           </div>
-          <p class="meta">Version 1.0 · Android 8.0 or newer</p>
+          <p class="meta">Version 1.0.0 · Android 8.0 or newer · <a href="https://github.com/nraj07054/trace-app/releases" target="_blank" rel="noopener">All releases</a></p>
+          <div class="verify" id="verify">
+            <p class="verify-title">Verify your download</p>
+            <p class="verify-sub">The APK's SHA-256 checksum. It should match what you get from <code>shasum -a 256 Trace.apk</code> (or <code>sha256sum</code>).</p>
+            <div class="hash-row">
+              <code class="hash" id="sha">1b9ee665180037012b3cc15ce82750bd974e855b8379903d4423ba74d5d9cded</code>
+              <button class="copy" type="button" id="copySha">Copy</button>
+            </div>
+            <a class="src-link" href="https://github.com/nraj07054/trace-app" target="_blank" rel="noopener" data-goatcounter-click="source-get"><svg aria-hidden="true"><use href="#i-github"/></svg>Read the source code on GitHub →</a>
+          </div>
         </div>
         <ol class="install">
           <li><div><b>Download on your phone</b><span>Open this page on your Android phone and tap Download APK.</span></div></li>
@@ -500,7 +528,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <footer>
   <div class="wrap">
     <span class="logo" style="font-size:20px">Trace<span class="dot">.</span></span>
-    <span>Every rupee leaves a trace. Made for Android.</span>
+    <span>Every rupee leaves a trace. Made for Android. <a href="https://github.com/nraj07054/trace-app" target="_blank" rel="noopener">Source on GitHub</a></span>
     <a class="foot-kofi" href="https://ko-fi.com/hey_nikhilraj" target="_blank" rel="noopener" data-goatcounter-click="kofi-footer" data-goatcounter-title="Ko-fi (footer)"><svg aria-hidden="true"><use href="#i-heart"/></svg>Buy me a coffee</a>
   </div>
 </footer>
@@ -709,5 +737,16 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 </script>
 <!-- Visitor counts (GoatCounter: no cookies). Download taps are counted via data-goatcounter-click. -->
 <script data-goatcounter="https://nraj.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+(() => {
+  const btn = document.getElementById('copySha'), code = document.getElementById('sha');
+  if (!btn || !code) return;
+  btn.addEventListener('click', () => {
+    const done = () => { btn.textContent = 'Copied ✓'; setTimeout(() => (btn.textContent = 'Copy'), 1600); };
+    const pick = () => { const r = document.createRange(); r.selectNodeContents(code); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = 'Selected'; };
+    (navigator.clipboard?.writeText(code.textContent) || Promise.reject()).then(done, pick);
+  });
+})();
+</script>
 </body>
 </html>
