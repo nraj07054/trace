@@ -1,46 +1,34 @@
 # Trace
 
-**Every rupee leaves a trace.** A light, quick expense tracker for Android.
+Every rupee leaves a trace. A small, private Android expense tracker built with Kotlin, Jetpack Compose and Room.
 
-Website: https://nraj07054.github.io/trace/
+## Features
+- **Home:** weekly, monthly, 6-month and yearly stacked-bar chart with a spring animation, category filters and recent expenses. Tap any expense to edit or delete it.
+- **Add expense:** keypad entry, category, note and date.
+- **Lock-screen quick-add:** a small notification and a Quick Settings tile open the add box over the lock screen, with no unlock needed. A launcher shortcut does the same from the home screen.
+- **Voice add:** tap the mic and say "50 for vada pav". Trace fills in the amount, the note and the category. Speech is recognised on the phone (Android 12+ with an offline language installed); nothing is sent anywhere.
+- **Insights:** highlights, what changed from last month, and monthly budgets per category.
+- **Custom categories**, currency choice (₹ $ € £), and a friendly first-run onboarding and permissions screen.
 
-## What it does
+**Private by design:** no account, no bank login. The app has no internet permission at all; everything is stored on your phone.
 
-- **Lock-screen add:** one small notification on your lock screen. Tap it, type the amount, pick a category, done. The phone stays locked.
-- **A chart you can tap:** your week as stacked, springy bars. Switch between week, month, 6 months and year, or filter by category.
-- **Your own categories:** Food, Travel, Shopping, Bills and Fun built in; add your own with a name, colour and icon.
-- **Insights:** plain-language highlights, what changed vs last month, and monthly budgets per category.
-- **Private by design:** no account, no bank login. The app has no internet permission at all; everything is stored on your phone.
-
-## Download
-
-Get the APK from the [latest release](https://github.com/nraj07054/trace-app/releases/latest). Android 8.0 or newer.
-
-### Verify the download
-
-Each release lists the APK's SHA-256. Check it before installing:
-
-```bash
-# macOS
-shasum -a 256 Trace.apk
-# Linux
-sha256sum Trace.apk
-# Windows (PowerShell)
-Get-FileHash Trace.apk -Algorithm SHA256
+## Build
+Requires JDK 21 (Android Studio's bundled JBR works).
 ```
-
-v1.0.0: `1b9ee665180037012b3cc15ce82750bd974e855b8379903d4423ba74d5d9cded`
-
-## Build it yourself
-
-Requirements: Android SDK (platform 36) and JDK 17–21.
-
-```bash
-./gradlew assembleDebug     # app/build/outputs/apk/debug/app-debug.apk
-./gradlew assembleRelease   # minified build
+./gradlew assembleRelease     # app/build/outputs/apk/release/app-release.apk
+./gradlew bundleRelease       # app/build/outputs/bundle/release/app-release.aab (Google Play)
+./gradlew testDebugUnitTest   # unit tests
 ```
+Release builds are signed with the upload key in `keystore.properties` when it exists, and with the debug key otherwise.
 
-Tech: Kotlin, Jetpack Compose (Material 3), Room. No third-party analytics or ads in the app.
+## Project layout
+```
+app/src/main/java/com/homeboundlabs/trace/
+  data/         Room database, repository, preferences
+  quickadd/     lock-screen notification, tile, quick-add screen, voice input
+  ui/           Compose screens: home, add, insights, onboarding, permissions, settings
+app/schemas/    Room schema history (used for migrations)
+```
 
 ## License
 

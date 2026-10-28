@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static launcher shortcut: opens the quick add box over whatever is on screen. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_add"
+        android:shortcutId="add_expense"
+        android:shortcutLongLabel="@string/shortcut_add_long"
+        android:shortcutShortLabel="@string/shortcut_add_short">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.homeboundlabs.trace.quickadd.QuickAddActivity"
+            android:targetPackage="com.homeboundlabs.trace" />
+    </shortcut>
+</shortcuts>

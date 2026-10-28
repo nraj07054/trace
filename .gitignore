@@ -1,8 +1,26 @@
+# Build output
 .gradle/
 build/
 app/build/
+.kotlin/
 local.properties
 .idea/
 *.iml
-.kotlin/
-Trace.apk
+.DS_Store
+
+# Built APKs and bundles (published as GitHub release assets instead)
+releases/
+*.apk
+*.aab
+
+# Play upload key and its passwords: never commit these
+keystore.properties
+*.jks
+*.keystore
+
+# Local working folders, kept out of the public source repo
+.claude/
+docs/
+marketing/
+play-store/
+site/

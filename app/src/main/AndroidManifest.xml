@@ -3,6 +3,15 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Voice add: used only while listening; speech is understood on the phone (no internet permission). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Lets Trace find Android's on-device speech recogniser (Android 11+ package visibility). -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
     <application
         android:name=".TraceApp"
@@ -22,6 +31,10 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Long-press the app icon → "Add expense". Phone gestures can also open this shortcut. -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <!-- Lock-screen quick-add: its own task so it never surfaces the rest of the app over the keyguard. -->
@@ -31,7 +44,7 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:showWhenLocked="true"
-            android:taskAffinity="com.trace.app.quickadd"
+            android:taskAffinity="com.homeboundlabs.trace.quickadd"
             android:theme="@style/Theme.Trace.Lock" />
 
         <receiver
