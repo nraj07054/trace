@@ -98,11 +98,6 @@ fun SpendChart(
                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx())),
                 )
             }
-            Text(
-                "avg " + Money.whole(avg.toDouble(), currency),
-                style = ts(10, 600, TraceColors.Faint),
-                modifier = Modifier.align(Alignment.BottomEnd).offset { IntOffset(0, -(avgAnim + 4).dp.roundToPx()) },
-            )
             Row(
                 Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -123,6 +118,11 @@ fun SpendChart(
                     }
                 }
             }
+            // On top of the bars (it takes no taps), on the left: today's bubble is usually on the right.
+            AvgTag(
+                "avg " + Money.whole(avg.toDouble(), currency), visible = avg > 0f, reduceMotion = reduceMotion,
+                modifier = Modifier.align(Alignment.BottomStart).offset { IntOffset(0, -(avgAnim + 4).dp.roundToPx()) },
+            )
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             buckets.forEachIndexed { i, b ->
@@ -137,6 +137,26 @@ fun SpendChart(
             }
         }
     }
+}
+
+/**
+ * The "avg ₹1,901" label for both charts: a small pill in the page color, so it stays readable
+ * where it crosses a bar or the line. Fades out when there's nothing to average (a filter with
+ * no spending), instead of sitting on the floor as "avg ₹0".
+ */
+@Composable
+internal fun AvgTag(text: String, visible: Boolean, reduceMotion: Boolean, modifier: Modifier = Modifier) {
+    val alpha by animateFloatAsState(if (visible) 1f else 0f, if (reduceMotion) snap() else tween(200), label = "avgTag")
+    Text(
+        text,
+        style = ts(10, 700, TraceColors.Muted),
+        maxLines = 1,
+        modifier = modifier
+            .graphicsLayer { this.alpha = alpha }
+            .clip(RoundedCornerShape(6.dp))
+            .background(TraceColors.Surface.copy(alpha = 0.88f))
+            .padding(horizontal = 5.dp, vertical = 2.dp),
+    )
 }
 
 @Composable

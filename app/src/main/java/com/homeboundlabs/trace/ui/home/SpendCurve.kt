@@ -133,9 +133,8 @@ fun SpendCurve(
                 drawCircle(line, radius = 7.dp.toPx(), center = m, style = Stroke(width = 3.5.dp.toPx()))
             }
 
-            Text(
-                "avg " + Money.whole(avg.toDouble(), currency),
-                style = ts(10, 600, TraceColors.Faint),
+            AvgTag(
+                "avg " + Money.whole(avg.toDouble(), currency), visible = avg > 0f, reduceMotion = reduceMotion,
                 modifier = Modifier.fillMaxSize().layout { measurable, constraints ->
                     val p = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
                     layout(constraints.maxWidth, constraints.maxHeight) {
