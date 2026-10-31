@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Transaction
+import com.homeboundlabs.trace.ui.theme.TraceColors
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,8 @@ data class Category(
     val position: Int,
 ) {
     val label: String get() = name
-    val color: Color get() = Color(argb)
+    /** Brightened a little on dark surfaces; [colorInt] stays the stored color (notifications). */
+    val color: Color get() = TraceColors.category(argb)
     val colorInt: Int get() = argb.toInt()
 
     companion object {

@@ -100,8 +100,8 @@ fun CategoriesScreen(onBack: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TIcon(TraceIcons.Plus, Color.White, 18.dp)
-                    Text("New category", style = ts(16, 700, Color.White))
+                    TIcon(TraceIcons.Plus, TraceColors.OnInk, 18.dp)
+                    Text("New category", style = ts(16, 700, TraceColors.OnInk))
                 }
             }
         }
@@ -161,7 +161,7 @@ private fun DeleteDialog(c: Category, others: List<Category>, count: Int, onDism
                         val on = i == targetIdx
                         val shape = RoundedCornerShape(18.dp)
                         Row(
-                            Modifier.height(36.dp).clip(shape).background(if (on) o.color else Color.White)
+                            Modifier.height(36.dp).clip(shape).background(if (on) o.color else TraceColors.Surface)
                                 .border(1.dp, if (on) o.color else TraceColors.Border, shape)
                                 .tap(role = Role.RadioButton, label = o.name) { targetIdx = i }.padding(horizontal = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,

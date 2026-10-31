@@ -122,7 +122,7 @@ private fun StatusRow(ok: Boolean, title: String, body: String) {
         Box(
             Modifier.size(22.dp).clip(CircleShape).background(if (ok) TraceColors.Positive else TraceColors.Ghost),
             contentAlignment = Alignment.Center,
-        ) { Text(if (ok) "✓" else "?", style = ts(12, 800, Color.White)) }
+        ) { Text(if (ok) "✓" else "?", style = ts(12, 800, if (ok) TraceColors.Surface else Color.White)) }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, style = ts(14, 700, if (ok) TraceColors.Positive else TraceColors.Ink))
             Text(body, style = ts(13, 400, TraceColors.Muted))
@@ -136,7 +136,7 @@ private fun PillButton(label: String, onClick: () -> Unit) {
         Modifier.height(40.dp).clip(RoundedCornerShape(20.dp)).background(TraceColors.Ink).tap(label = label, onClick = onClick)
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
-    ) { Text(label, style = ts(13, 700, Color.White)) }
+    ) { Text(label, style = ts(13, 700, TraceColors.OnInk)) }
 }
 
 @Composable
@@ -144,7 +144,7 @@ fun TraceSwitch(checked: Boolean) {
     Switch(
         checked = checked, onCheckedChange = null,
         colors = SwitchDefaults.colors(
-            checkedTrackColor = TraceColors.Ink, checkedThumbColor = Color.White,
+            checkedTrackColor = TraceColors.Ink, checkedThumbColor = TraceColors.OnInk,
             uncheckedTrackColor = TraceColors.Fill, uncheckedBorderColor = TraceColors.Border,
             uncheckedThumbColor = TraceColors.Faint,
         ),

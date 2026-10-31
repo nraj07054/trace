@@ -200,7 +200,7 @@ fun AddScreen(onClose: () -> Unit, editId: Long? = null) {
         ) {
             categories.forEach { c ->
                 val on = c.id == cat.id
-                val bg by animateColorAsState(if (on) c.color else Color.White, label = "chip")
+                val bg by animateColorAsState(if (on) c.color else TraceColors.Surface, label = "chip")
                 val shape = RoundedCornerShape(20.dp)
                 Row(
                     Modifier.height(40.dp).clip(shape).background(bg).border(1.dp, if (on) c.color else TraceColors.Border, shape)
@@ -229,7 +229,7 @@ fun AddScreen(onClose: () -> Unit, editId: Long? = null) {
                 .background(if (enabled) TraceColors.Ink else TraceColors.Ink.copy(alpha = 0.25f))
                 .tap(label = "Save expense") { save() },
             contentAlignment = Alignment.Center,
-        ) { Text(if (editId == null) "Save expense" else "Save changes", style = ts(16, 700, Color.White)) }
+        ) { Text(if (editId == null) "Save expense" else "Save changes", style = ts(16, 700, TraceColors.OnInk)) }
     }
 
     if (confirmDelete && editId != null) {

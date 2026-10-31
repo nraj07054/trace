@@ -44,9 +44,11 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homeboundlabs.trace.data.CURRENCIES
+import com.homeboundlabs.trace.data.ThemeMode
 import com.homeboundlabs.trace.quickadd.QuickAdd
 import com.homeboundlabs.trace.traceApp
 import com.homeboundlabs.trace.ui.components.CircleButton
+import com.homeboundlabs.trace.ui.components.TIcon
 import com.homeboundlabs.trace.ui.components.TraceIcons
 import com.homeboundlabs.trace.ui.components.tap
 import com.homeboundlabs.trace.ui.theme.TraceColors
@@ -123,7 +125,33 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                                 scope.launch { QuickAdd.refresh(context) }
                             },
                         contentAlignment = Alignment.Center,
-                    ) { Text(c, style = ts(18, 800, if (on) Color.White else TraceColors.Ink)) }
+                    ) { Text(c, style = ts(18, 800, if (on) TraceColors.OnInk else TraceColors.Ink)) }
+                }
+            }
+        }
+
+        Section("Appearance") {
+            val mode by app.prefs.themeMode.collectAsStateWithLifecycle()
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    Triple(ThemeMode.Light, "Light", TraceIcons.Sun),
+                    Triple(ThemeMode.Dark, "Dark", TraceIcons.Moon),
+                    Triple(ThemeMode.System, "Match phone", TraceIcons.icon("phone")),
+                ).forEach { (m, label, icon) ->
+                    val on = m == mode
+                    val shape = RoundedCornerShape(18.dp)
+                    val fg = if (on) TraceColors.OnInk else TraceColors.Ink
+                    Column(
+                        Modifier.weight(1f).height(64.dp).clip(shape)
+                            .background(if (on) TraceColors.Ink else TraceColors.Surface)
+                            .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
+                            .tap(role = Role.RadioButton, label = label) { app.prefs.setThemeMode(m) },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
+                    ) {
+                        TIcon(icon, fg, 18.dp)
+                        Text(label, style = ts(13, 700, fg), maxLines = 1)
+                    }
                 }
             }
         }
@@ -161,7 +189,7 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                 Switch(
                     checked = quickAdd, onCheckedChange = null,
                     colors = SwitchDefaults.colors(
-                        checkedTrackColor = TraceColors.Ink, checkedThumbColor = Color.White,
+                        checkedTrackColor = TraceColors.Ink, checkedThumbColor = TraceColors.OnInk,
                         uncheckedTrackColor = TraceColors.Fill, uncheckedBorderColor = TraceColors.Border,
                         uncheckedThumbColor = TraceColors.Faint,
                     ),

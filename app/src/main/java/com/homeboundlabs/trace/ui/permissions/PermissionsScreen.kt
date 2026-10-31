@@ -169,7 +169,7 @@ fun PermissionsScreen(onDone: () -> Unit) {
         if (showNotif) {
             PermissionCard(
                 index = 0, reduceMotion = reduceMotion,
-                icon = TraceIcons.Bell, tint = Color(0xFFFF7A45),
+                icon = TraceIcons.Bell, tint = TraceColors.Accent,
                 title = "Notifications",
                 why = "Shows one small, silent line on your lock screen. Tap it to add an expense without unlocking.",
                 promise = "Silent · never ads or reminders",
@@ -196,7 +196,7 @@ fun PermissionsScreen(onDone: () -> Unit) {
             Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
                 .tap(label = "Continue") { scope.launch { finish() } },
             contentAlignment = Alignment.Center,
-        ) { Text("Continue", style = ts(16, 700, Color.White)) }
+        ) { Text("Continue", style = ts(16, 700, TraceColors.OnInk)) }
         Text(
             "You can change these any time in Settings.",
             style = ts(13, 500, TraceColors.Faint),
@@ -252,14 +252,14 @@ private fun PermissionCard(
                     Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.Ink)
                         .tap(label = "Allow $title", onClick = onAllow),
                     contentAlignment = Alignment.Center,
-                ) { Text("Allow", style = ts(15, 700, Color.White)) }
+                ) { Text("Allow", style = ts(15, 700, TraceColors.OnInk)) }
                 Status.Allowed -> Row(
                     Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.PositiveBg),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(Modifier.size(20.dp).clip(CircleShape).background(TraceColors.Positive), contentAlignment = Alignment.Center) {
-                        TIcon(TraceIcons.Check, Color.White, 12.dp)
+                        TIcon(TraceIcons.Check, TraceColors.Surface, 12.dp)
                     }
                     Text("Allowed", style = ts(15, 700, TraceColors.Positive))
                 }

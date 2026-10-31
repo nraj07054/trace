@@ -34,7 +34,6 @@ import com.homeboundlabs.trace.ui.theme.ts
 
 const val KOFI_URL = "https://ko-fi.com/hey_nikhilraj"
 private const val SOURCE_URL = "https://github.com/nraj07054/trace-app"
-private val KofiTint = Color(0xFFFFE9DF)
 
 /**
  * Quiet "About" block at the end of Settings: an optional Ko-fi tip, the source link and the version.
@@ -50,7 +49,7 @@ fun AboutSection() {
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    Modifier.size(48.dp).rotate(-6f).clip(RoundedCornerShape(15.dp)).background(KofiTint),
+                    Modifier.size(48.dp).rotate(-6f).clip(RoundedCornerShape(15.dp)).background(TraceColors.AccentBg),
                     contentAlignment = Alignment.Center,
                 ) { TIcon(TraceIcons.Cup, TraceColors.Accent, 24.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {

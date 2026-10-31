@@ -99,7 +99,7 @@ private fun QuickPick(label: String, on: Boolean, onClick: () -> Unit) {
             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
             .tap(role = Role.Button, label = label, onClick = onClick).padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
-    ) { Text(label, style = ts(13, 600, if (on) Color.White else TraceColors.Ink)) }
+    ) { Text(label, style = ts(13, 600, if (on) TraceColors.OnInk else TraceColors.Ink)) }
 }
 
 @Composable
@@ -172,7 +172,7 @@ private fun androidx.compose.foundation.layout.RowScope.DayCell(
                 style = ts(
                     13, if (isSel || isToday) 700 else 500,
                     when {
-                        isSel -> Color.White
+                        isSel -> TraceColors.OnInk
                         future -> TraceColors.Border
                         else -> TraceColors.Ink
                     },
