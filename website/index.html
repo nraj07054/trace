@@ -300,6 +300,17 @@ footer a { color: var(--muted); }
 footer { padding-block: 48px 64px; color: var(--faint); font-size: 14px; }
 footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
 
+/* ---------- tap feedback: plays fully before a download or Ko-fi opens ---------- */
+.btn.go, .foot-kofi.go { animation: tap .6s var(--spring); }
+@keyframes tap { 0% { transform: scale(1); } 30% { transform: scale(.9); } 100% { transform: scale(1); } }
+.btn-ink, .btn-sm { position: relative; overflow: hidden; }
+.btn-ink.go::after, .btn-sm.go::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--accent); transform-origin: left; animation: bar-fill .6s ease-out both; }
+@keyframes bar-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.btn-kofi, .foot-kofi { position: relative; }
+.pop-heart { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; fill: var(--food); pointer-events: none; animation: heart-up .55s ease-out forwards; }
+.btn-kofi .pop-heart, .foot-kofi .pop-heart { fill: var(--food); } /* beats the white icon rule inside the button */
+@keyframes heart-up { from { transform: translate(-50%, -50%) scale(.4); opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% - 46px)) scale(1); opacity: 0; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .squiggle path { stroke-dashoffset: 0; }
@@ -781,6 +792,41 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     });
     if (parts.length) raf = requestAnimationFrame(step); else ctx.clearRect(0, 0, w, h);
   }
+})();
+</script>
+<script>
+/* Download and Ko-fi taps: let the tap animation finish, then start the download or open Ko-fi. */
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const WAIT = reduce ? 0 : 600; // a little longer for Ko-fi so the hearts finish
+  const links = document.querySelectorAll('a[href$="/Trace.apk"], a[href^="https://ko-fi.com/"]');
+  links.forEach(a => a.addEventListener('click', e => {
+    // Ctrl/Cmd/Shift-clicks keep the browser's own behaviour.
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (a.classList.contains('go')) { e.preventDefault(); return; } // already on its way
+    e.preventDefault();
+    const kofi = a.href.startsWith('https://ko-fi.com/');
+    a.classList.add('go');
+    if (kofi && !reduce) {
+      for (let i = 0; i < 5; i++) {
+        const h = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        h.setAttribute('class', 'pop-heart'); h.setAttribute('aria-hidden', 'true');
+        h.style.setProperty('--dx', (i - 2) * 22 + 'px'); h.style.animationDelay = i * 40 + 'ms';
+        h.innerHTML = '<use href="#i-heart"/>';
+        a.appendChild(h);
+      }
+    }
+    setTimeout(() => {
+      // Browsers still treat this as part of the tap (well under their ~1s limit). If one
+      // blocks the new tab anyway, Ko-fi opens in this tab instead.
+      if (!kofi) location.href = a.href;
+      else {
+        const tab = window.open(a.href, '_blank');
+        if (tab) tab.opener = null; else location.href = a.href;
+      }
+      setTimeout(() => { a.classList.remove('go'); a.querySelectorAll('.pop-heart').forEach(h => h.remove()); }, 400);
+    }, kofi && !reduce ? WAIT + 120 : WAIT);
+  }));
 })();
 </script>
 <!-- Visitor counts (GoatCounter: no cookies). Download taps are counted via data-goatcounter-click. -->
