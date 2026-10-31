@@ -1,0 +1,26 @@
+# Deletes a pull request's branch once it is merged into main.
+name: Delete merged branch
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  delete:
+    # Only merged PRs from this repo; closed-without-merge branches are kept, and main is never touched.
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref != 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete the branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        # Already gone (e.g. deleted by hand) is fine.
+        run: gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$BRANCH" || echo "Branch $BRANCH was already deleted."
