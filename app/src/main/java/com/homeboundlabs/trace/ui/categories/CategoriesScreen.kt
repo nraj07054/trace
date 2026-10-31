@@ -147,7 +147,7 @@ private fun DeleteDialog(c: Category, others: List<Category>, count: Int, onDism
     var targetIdx by remember { mutableIntStateOf(0) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = TraceColors.Surface,
+        containerColor = TraceColors.Sheet,
         title = { Text("Delete “${c.name}”?", style = ts(18, 800)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

@@ -440,7 +440,7 @@ private fun SetupPage(
             Switch(
                 checked = quickAdd, onCheckedChange = null,
                 colors = SwitchDefaults.colors(
-                    checkedTrackColor = TraceColors.Ink, checkedThumbColor = TraceColors.OnInk,
+                    checkedTrackColor = TraceColors.SwitchOn, checkedThumbColor = TraceColors.SwitchThumb,
                     uncheckedTrackColor = TraceColors.Fill, uncheckedBorderColor = TraceColors.Border,
                     uncheckedThumbColor = TraceColors.Faint,
                 ),
@@ -591,7 +591,8 @@ private fun LockCardArt(active: Boolean, reduceMotion: Boolean, voice: Boolean) 
     // Phone silhouette with a dark lock screen.
     Box(
         Modifier.width(260.dp).height(300.dp).clip(RoundedCornerShape(36.dp)).background(Color(0xFF14161B))
-            .border(6.dp, Color(0xFF0E0F12), RoundedCornerShape(36.dp)),
+            // On a dark page a black frame would vanish, so it gets a lighter rim there.
+            .border(6.dp, if (TraceColors.isDark) Color(0xFF2A2D35) else Color(0xFF0E0F12), RoundedCornerShape(36.dp)),
     ) {
         Canvas(Modifier.fillMaxSize()) {
             drawCircle(Color(0xFF232836), radius = size.width * 0.75f, center = androidx.compose.ui.geometry.Offset(0f, size.height))

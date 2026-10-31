@@ -54,6 +54,18 @@ class Palette(
     val navInactive: Color,
     val avatarText: Color,
     val chipSubOn: Color,
+    /** Keypad keys: one step up from the page, so they read as buttons. */
+    val key: Color,
+    /** Small round buttons such as the month and date arrows. */
+    val roundButton: Color,
+    /** A main button that can't be pressed yet, and its label. */
+    val disabledBg: Color,
+    val disabledText: Color,
+    /** Bottom sheets and dialogs: on dark, a step lighter than the page so their edge shows. */
+    val sheet: Color,
+    /** A switch that's on. */
+    val switchOn: Color,
+    val switchThumb: Color,
 )
 
 val LightPalette = Palette(
@@ -81,6 +93,13 @@ val LightPalette = Palette(
     navInactive = Color(0xFFA1A6B3),
     avatarText = Color(0xFF4A4F5C),
     chipSubOn = Color(0xFFC9CCD4),
+    key = Color(0xFFF7F8FA),
+    roundButton = Color(0xFFF1F2F5),
+    disabledBg = Color(0x400E0F12),
+    disabledText = Color(0xFFFFFFFF),
+    sheet = Color(0xFFFFFFFF),
+    switchOn = Color(0xFF0E0F12),
+    switchThumb = Color(0xFFFFFFFF),
 )
 
 /** Near-black surfaces and greys from the dark "B" designs; the orange accent stays. */
@@ -89,7 +108,7 @@ val DarkPalette = Palette(
     onInk = Color(0xFF0C0D10),
     muted = Color(0xFF9298A4),
     faint = Color(0xFF7A808C),
-    ghost = Color(0xFF3A3E48),
+    ghost = Color(0xFF5C616D),
     surface = Color(0xFF0C0D10),
     fill = Color(0xFF17191E),
     field = Color(0xFF15171B),
@@ -109,6 +128,13 @@ val DarkPalette = Palette(
     navInactive = Color(0xFF6E7480),
     avatarText = Color(0xFFC9CDD6),
     chipSubOn = Color(0xFF4A4F5C),
+    key = Color(0xFF1D2026),
+    roundButton = Color(0xFF1D2026),
+    disabledBg = Color(0xFF1D2026),
+    disabledText = Color(0xFF6E7480),
+    sheet = Color(0xFF17191E),
+    switchOn = Color(0xFFFF7A45),
+    switchThumb = Color(0xFFFFFFFF),
 )
 
 /**
@@ -145,6 +171,13 @@ object TraceColors {
     val NavInactive: Color get() = p.navInactive
     val AvatarText: Color get() = p.avatarText
     val ChipSubOn: Color get() = p.chipSubOn
+    val Key: Color get() = p.key
+    val RoundButton: Color get() = p.roundButton
+    val DisabledBg: Color get() = p.disabledBg
+    val DisabledText: Color get() = p.disabledText
+    val Sheet: Color get() = p.sheet
+    val SwitchOn: Color get() = p.switchOn
+    val SwitchThumb: Color get() = p.switchThumb
 
     /** Category colors are stored once; on dark surfaces they're lifted a little so they stay bright. */
     fun category(argb: Long): Color = if (isDark) lerp(Color(argb), Color.White, 0.12f) else Color(argb)

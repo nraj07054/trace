@@ -18,12 +18,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.layer.drawLayer
@@ -36,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.PI
+import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
@@ -47,19 +49,21 @@ fun isDarkFor(mode: ThemeMode, systemDark: Boolean): Boolean = when (mode) {
 }
 
 private const val DURATION_MS = 1100
+// How far through each animation the new color has covered the status bar.
+private const val SUNSET_STATUS_AT = 0.45f
+private const val SUNRISE_STATUS_AT = 0.55f
 private val Sky = CubicBezierEasing(0.45f, 0f, 0.2f, 1f)
 
 /**
  * Hosts the app and switches it between light and dark when the saved [ThemeMode] (or the
  * phone's own setting) changes.
  *
- * Going dark is a sunset: night comes down from the top and the light sinks away below it.
- * Going light is a sunrise: day comes up from the bottom. A soft orange glow rides the line
- * between the two. It works by taking a picture of the screen in the old colors, switching the
+ * Going dark is a sunset: night spreads out from the top-right corner (where the toggle is)
+ * in a widening circle. Going light is the sunrise, its exact reverse: the night shrinks back
+ * into that corner and the day is left behind. The sun's glow rides the edge either way. It works by taking a picture of the screen in the old colors, switching the
  * real screen underneath, then wiping the picture away along that line.
  *
- * [onDark] runs when the status bar should change: at the start of a sunset (the top goes
- * dark first) and at the end of a sunrise (the top goes light last).
+ * [onDark] runs when the status bar should change: once the new color has covered the top edge.
  */
 @Composable
 fun ThemeHost(onDark: (Boolean) -> Unit, content: @Composable () -> Unit) {
@@ -93,10 +97,14 @@ fun ThemeHost(onDark: (Boolean) -> Unit, content: @Composable () -> Unit) {
             progress.snapTo(0f)
             before = shot
             TraceColors.isDark = dark
-            if (dark) onDarkNow(true)
-            progress.animateTo(1f, tween(DURATION_MS, easing = Sky))
+            // The circle has crossed the whole top edge about here, so the clock and battery
+            // icons switch then, both ways.
+            var flipped = false
+            progress.animateTo(1f, tween(DURATION_MS, easing = Sky)) {
+                if (!flipped && value >= (if (dark) SUNSET_STATUS_AT else SUNRISE_STATUS_AT)) { flipped = true; onDarkNow(dark) }
+            }
             before = null
-            if (!dark) onDarkNow(false)
+            if (!flipped) onDarkNow(dark)
         }
     }
 
@@ -118,42 +126,51 @@ fun ThemeHost(onDark: (Boolean) -> Unit, content: @Composable () -> Unit) {
 }
 
 /**
- * The old screen [before], shown only on its side of a moving horizon.
- * [t] runs 0 → 1. Sunset: the horizon falls from above the top to below the bottom, and the old
- * (light) screen is what's left below it. Sunrise: it climbs from the bottom, and the old (dark)
- * screen is what's left above it.
+ * The night as a circle around the top-right corner, where the sun/moon toggle sits.
+ * [t] runs 0 → 1. Sunset: the circle grows until it covers the screen, and the old (light)
+ * screen [before] shows only outside it. Sunrise: the circle starts over the whole screen and
+ * shrinks back into the corner, and the old (dark) screen shows only inside it.
  */
 private fun DrawScope.drawHorizon(before: ImageBitmap, t: Float, sunset: Boolean, glow: Color) {
+    val w = size.width
     val h = size.height
-    val feather = 140f * density // soft edge, so it reads as dusk rather than a hard wipe
-    val edge = if (sunset) -feather + (h + 2 * feather) * t else h + feather - (h + 2 * feather) * t
+    val center = Offset(w, 0f)
+    val feather = 120f * density // soft edge, so it reads as dusk rather than a hard wipe
+    val reach = hypot(w, h) + feather
+    val grow = if (sunset) t else 1f - t
+    val r = -feather / 2 + (reach + feather / 2) * grow
 
-    // Old screen, faded out across the feather on the new theme's side.
     drawIntoCanvas { canvas ->
-        canvas.saveLayer(androidx.compose.ui.geometry.Rect(Offset.Zero, size), Paint())
-        drawImage(before, dstSize = IntSize(size.width.roundToInt(), h.roundToInt()))
-        val keep = if (sunset) listOf(Color.Transparent, Color.Black) else listOf(Color.Black, Color.Transparent)
+        canvas.saveLayer(Rect(Offset.Zero, size), Paint())
+        drawImage(before, dstSize = IntSize(w.roundToInt(), h.roundToInt()))
+        val outer = (r + feather / 2).coerceAtLeast(1f)
+        val inner = ((r - feather / 2) / outer).coerceIn(0f, 0.999f)
+        // Keep the old screen outside the night (sunset) or inside it (sunrise).
+        val (inside, outside) = if (sunset) Color.Transparent to Color.Black else Color.Black to Color.Transparent
         drawRect(
-            Brush.verticalGradient(keep, startY = edge - feather / 2, endY = edge + feather / 2),
+            Brush.radialGradient(0f to inside, inner to inside, 1f to outside, center = center, radius = outer),
             blendMode = BlendMode.DstIn,
         )
         canvas.restore()
     }
 
-    // The sun's glow along the horizon: strongest halfway, gone at both ends.
-    val strength = 0.28f * sin(PI * t).toFloat()
-    if (strength > 0.01f) {
-        val band = 180f * density
+    // The sun's glow along the edge: strongest halfway, gone at both ends.
+    val strength = (if (sunset) 0.30f else 0.22f) * sin(PI * t).toFloat()
+    if (strength > 0.01f && r > 0f) {
+        val band = 160f * density
+        val outer = r + band
+        val mid = (r / outer).coerceIn(0f, 1f)
+        val inner = ((r - band) / outer).coerceIn(0f, mid)
+        val tint = if (sunset) glow else lerp(glow, Color(0xFFFFD27A), 0.5f)
         drawRect(
-            Brush.verticalGradient(
+            Brush.radialGradient(
                 0f to Color.Transparent,
-                0.5f to glow.copy(alpha = strength),
+                inner to Color.Transparent,
+                mid to tint.copy(alpha = strength),
                 1f to Color.Transparent,
-                startY = edge - band,
-                endY = edge + band,
+                center = center,
+                radius = outer,
             ),
-            topLeft = Offset(0f, edge - band),
-            size = Size(size.width, 2 * band),
         )
     }
 }

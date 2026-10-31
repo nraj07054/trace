@@ -100,7 +100,7 @@ fun HomeScreen(onAdd: () -> Unit, onSettings: () -> Unit, onSeeAll: () -> Unit, 
                 Spacer(Modifier.height(244.dp))
             }
             PeriodPills(ui.period, vm::selectPeriod)
-            CategoryChips(ui, vm::selectFilter)
+            if (TraceColors.isDark) BudgetRings(ui, vm::selectFilter) else CategoryChips(ui, vm::selectFilter)
             Recent(ui, onSeeAll, onEdit, Modifier.padding(horizontal = 22.dp))
         }
         StatusBarFade(visible = scroll.value > 0, reduceMotion = reduceMotion)
@@ -264,7 +264,8 @@ private fun BottomBar(onAdd: () -> Unit, onInsights: () -> Unit, onSettings: () 
             Modifier.fillMaxWidth().height(28.dp)
                 .background(Brush.verticalGradient(listOf(TraceColors.Surface.copy(alpha = 0f), TraceColors.Surface))),
         )
-        Row(
+        if (TraceColors.isDark) DarkNav(onAdd, onInsights, onSettings)
+        else Row(
             Modifier.fillMaxWidth().background(TraceColors.Surface).navigationBarsPadding().height(72.dp).padding(horizontal = 12.dp),
             // Each item gets an equal share of the width, so there's no empty stretch before the + button.
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -282,6 +283,37 @@ private fun BottomBar(onAdd: () -> Unit, onInsights: () -> Unit, onSettings: () 
         }
     }
 }
+
+/** Dark bar from the "B" design: the three icons in a raised pill, Home lit, and an accent + button. */
+@Composable
+private fun DarkNav(onAdd: () -> Unit, onInsights: () -> Unit, onSettings: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().background(TraceColors.Surface).navigationBarsPadding()
+            .padding(start = 22.dp, end = 22.dp, top = 4.dp, bottom = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            Modifier.weight(1f).height(62.dp).clip(CircleShape).background(NavPill).padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(46.dp).clip(CircleShape).background(NavLit), contentAlignment = Alignment.Center) {
+                TIcon(TraceIcons.Home, TraceColors.Ink, 24.dp, contentDescription = "Home")
+            }
+            NavIcon(TraceIcons.Insights, "Insights", NavDim, 23, onInsights)
+            NavIcon(TraceIcons.Settings, "Settings", NavDim, 23, onSettings)
+        }
+        Box(
+            Modifier.size(62.dp).clip(CircleShape).background(TraceColors.Accent).tap(label = "Add expense", onClick = onAdd),
+            contentAlignment = Alignment.Center,
+        ) { TIcon(TraceIcons.Plus, TraceColors.OnInk, 24.dp, contentDescription = "Add expense") }
+    }
+}
+
+private val NavPill = Color(0xFF1A1C21)
+private val NavLit = Color(0xFF2A2D35)
+private val NavDim = Color(0xFF8A909C)
 
 @Composable
 private fun NavIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, tint: Color, size: Int, onClick: () -> Unit) {

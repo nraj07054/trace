@@ -219,23 +219,23 @@ fun AddScreen(onClose: () -> Unit, editId: Long? = null) {
 
         Keypad(
             onKey = { amount = Money.press(amount, it) },
-            keyColor = TraceColors.Field,
+            keyColor = TraceColors.Key,
             textColor = TraceColors.Ink,
         )
 
         val enabled = minor > 0
         Box(
             Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp))
-                .background(if (enabled) TraceColors.Ink else TraceColors.Ink.copy(alpha = 0.25f))
+                .background(if (enabled) TraceColors.Ink else TraceColors.DisabledBg)
                 .tap(label = "Save expense") { save() },
             contentAlignment = Alignment.Center,
-        ) { Text(if (editId == null) "Save expense" else "Save changes", style = ts(16, 700, TraceColors.OnInk)) }
+        ) { Text(if (editId == null) "Save expense" else "Save changes", style = ts(16, 700, if (enabled) TraceColors.OnInk else TraceColors.DisabledText)) }
     }
 
     if (confirmDelete && editId != null) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            containerColor = TraceColors.Surface,
+            containerColor = TraceColors.Sheet,
             title = { Text("Delete expense?", style = ts(18, 800)) },
             text = {
                 Text(
