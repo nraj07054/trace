@@ -28,6 +28,7 @@ app/src/main/java/com/homeboundlabs/trace/
   quickadd/     lock-screen notification, tile, quick-add screen, voice input
   ui/           Compose screens: home, add, insights, onboarding, permissions, settings
 app/schemas/    Room schema history (used for migrations)
+website/        nraj07054.github.io/trace (published by .github/workflows/pages.yml)
 ```
 
 ## Support
