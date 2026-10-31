@@ -1,6 +1,23 @@
+<div align="center">
+
+<img src="website/apple-touch-icon.png" width="72" alt="">
+
 # Trace
 
-Every rupee leaves a trace. A small, private Android expense tracker built with Kotlin, Jetpack Compose and Room.
+**Every rupee leaves a trace.**<br>
+A small, private expense tracker for Android. Log a spend from your lock screen in about three taps.
+
+<a href="https://github.com/nraj07054/trace/releases/latest/download/Trace.apk"><img src=".github/readme/download.svg" height="44" alt="Download APK"></a>&nbsp;
+<a href="https://nraj07054.github.io/trace/"><img src=".github/readme/website.svg" height="44" alt="Website"></a>&nbsp;
+<a href="https://ko-fi.com/hey_nikhilraj"><img src=".github/readme/coffee.svg" height="44" alt="Buy me a coffee on Ko-fi"></a>
+
+<img src="website/img/home.jpg" width="200" alt="Home: the week as a chart, with recent expenses">&nbsp;&nbsp;
+<img src="website/img/add.jpg" width="200" alt="Adding an expense with the keypad">&nbsp;&nbsp;
+<img src="website/img/categories.jpg" width="200" alt="Categories, including your own">
+
+</div>
+
+Built with Kotlin, Jetpack Compose and Room.
 
 ## Features
 - **Home:** weekly, monthly, 6-month and yearly stacked-bar chart with a spring animation, category filters and recent expenses. Tap any expense to edit or delete it.
@@ -34,9 +51,14 @@ website/        nraj07054.github.io/trace (published by .github/workflows/pages.
 
 ## Support
 
-Trace is free, with no ads and no sign-up. If it helps you, a coffee keeps it going ☕
+<div align="center">
 
-<a href="https://ko-fi.com/hey_nikhilraj"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support Trace on Ko-fi" height="36"></a>
+Trace is free, with no ads and no sign-up.<br>
+If it helps you, a coffee keeps it going.
+
+<a href="https://ko-fi.com/hey_nikhilraj"><img src=".github/readme/coffee.svg" height="44" alt="Buy me a coffee on Ko-fi"></a>
+
+</div>
 
 ## License
 
