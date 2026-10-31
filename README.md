@@ -28,7 +28,14 @@ app/src/main/java/com/homeboundlabs/trace/
   quickadd/     lock-screen notification, tile, quick-add screen, voice input
   ui/           Compose screens: home, add, insights, onboarding, permissions, settings
 app/schemas/    Room schema history (used for migrations)
+website/        nraj07054.github.io/trace (published by .github/workflows/pages.yml)
 ```
+
+## Support
+
+Trace is free, with no ads and no sign-up. If it helps you, a coffee keeps it going ☕
+
+<a href="https://ko-fi.com/hey_nikhilraj"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support Trace on Ko-fi" height="36"></a>
 
 ## License
 
