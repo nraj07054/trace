@@ -55,7 +55,7 @@ fun DatePickerCard(selected: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: 
 
     Dialog(onDismissRequest = onDismiss) {
         Column(
-            Modifier.widthIn(max = 340.dp).fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(TraceColors.Surface)
+            Modifier.widthIn(max = 340.dp).fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(TraceColors.Sheet)
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -95,7 +95,7 @@ fun DatePickerCard(selected: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: 
 private fun QuickPick(label: String, on: Boolean, onClick: () -> Unit) {
     val shape = RoundedCornerShape(18.dp)
     Box(
-        Modifier.height(36.dp).clip(shape).background(if (on) TraceColors.Ink else TraceColors.Surface)
+        Modifier.height(36.dp).clip(shape).background(if (on) TraceColors.Ink else TraceColors.Sheet)
             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
             .tap(role = Role.Button, label = label, onClick = onClick).padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
@@ -111,7 +111,7 @@ private fun NavArrow(
     onClick: () -> Unit,
 ) {
     Box(
-        Modifier.size(36.dp).clip(CircleShape).background(TraceColors.Fill)
+        Modifier.size(36.dp).clip(CircleShape).background(TraceColors.RoundButton)
             .then(if (enabled) Modifier.tap(label = label, onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {

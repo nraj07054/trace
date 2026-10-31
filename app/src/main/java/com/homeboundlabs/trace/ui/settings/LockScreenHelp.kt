@@ -144,7 +144,7 @@ fun TraceSwitch(checked: Boolean) {
     Switch(
         checked = checked, onCheckedChange = null,
         colors = SwitchDefaults.colors(
-            checkedTrackColor = TraceColors.Ink, checkedThumbColor = TraceColors.OnInk,
+            checkedTrackColor = TraceColors.SwitchOn, checkedThumbColor = TraceColors.SwitchThumb,
             uncheckedTrackColor = TraceColors.Fill, uncheckedBorderColor = TraceColors.Border,
             uncheckedThumbColor = TraceColors.Faint,
         ),

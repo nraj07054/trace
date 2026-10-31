@@ -1,7 +1,7 @@
 package com.homeboundlabs.trace.ui.home
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateColorAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -142,7 +142,8 @@ fun SpendCurve(
                         val top = TOP.dp.toPx()
                         val span = constraints.maxHeight - top - BOTTOM.dp.toPx()
                         val y = top + span * (1f - avgShare) - p.height - 4.dp.toPx()
-                        p.place(constraints.maxWidth - p.width, y.roundToInt())
+                        // Left edge: the amount bubble usually sits on the right (the latest day).
+                        p.place(0, y.roundToInt())
                     }
                 },
             )

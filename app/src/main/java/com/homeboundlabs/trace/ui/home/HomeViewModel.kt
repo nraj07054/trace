@@ -43,6 +43,8 @@ data class HomeUi(
     val recent: List<Expense> = emptyList(),
     val currency: String = "₹",
     val name: String = "",
+    /** Monthly limits: category id → minor units. */
+    val budgets: Map<String, Long> = emptyMap(),
     val loaded: Boolean = false,
 )
 
@@ -58,8 +60,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         // The furthest back any comparison needs: the year before the 1Y window.
         val since = n.toLocalDate().withDayOfMonth(1).minusMonths(11).minusYears(1)
             .atStartOfDay(n.zone).toInstant().toEpochMilli()
-        combine(repo.observeSince(since), selection, prefs.currency, prefs.name, Categories.all) { list, sel, cur, name, cats ->
-            compute(n, list, sel, cur, name, cats)
+        val profile = combine(prefs.currency, prefs.name, prefs.budgets) { cur, name, budgets -> Triple(cur, name, budgets) }
+        combine(repo.observeSince(since), selection, profile, Categories.all) { list, sel, (cur, name, budgets), cats ->
+            compute(n, list, sel, cur, name, cats).copy(budgets = budgets)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
 

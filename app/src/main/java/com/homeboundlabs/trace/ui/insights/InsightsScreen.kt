@@ -127,7 +127,7 @@ private fun MonthSwitcher(ui: InsightsUi, onPrev: () -> Unit, onNext: () -> Unit
 @Composable
 private fun Arrow(label: String, enabled: Boolean, flip: Boolean, onClick: () -> Unit) {
     Box(
-        Modifier.size(44.dp).clip(CircleShape).background(TraceColors.Fill)
+        Modifier.size(44.dp).clip(CircleShape).background(TraceColors.RoundButton)
             .then(if (enabled) Modifier.tap(label = label, onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
@@ -327,7 +327,7 @@ private fun BudgetSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = TraceColors.Surface,
+        containerColor = TraceColors.Sheet,
     ) {
         Column(
             Modifier.fillMaxWidth().navigationBarsPadding().padding(start = 22.dp, end = 22.dp, bottom = 16.dp),
@@ -348,13 +348,13 @@ private fun BudgetSheet(
                     Text("You spent ${Money.whole(lastMonth, currency)} on ${category.name} in $previousMonthName", style = ts(13, 500, TraceColors.Muted))
                 }
             }
-            Keypad(onKey = { amount = Money.press(amount, it) }, keyColor = TraceColors.Field, textColor = TraceColors.Ink, keyHeight = 50)
+            Keypad(onKey = { amount = Money.press(amount, it) }, keyColor = TraceColors.Key, textColor = TraceColors.Ink, keyHeight = 50)
             Box(
                 Modifier.fillMaxWidth().height(54.dp).clip(RoundedCornerShape(27.dp))
-                    .background(if (minor > 0) TraceColors.Ink else TraceColors.Ink.copy(alpha = 0.25f))
+                    .background(if (minor > 0) TraceColors.Ink else TraceColors.DisabledBg)
                     .tap(label = "Save budget") { if (minor > 0) onSave(minor) },
                 contentAlignment = Alignment.Center,
-            ) { Text(if (current == null) "Set budget" else "Save budget", style = ts(16, 700, TraceColors.OnInk)) }
+            ) { Text(if (current == null) "Set budget" else "Save budget", style = ts(16, 700, if (minor > 0) TraceColors.OnInk else TraceColors.DisabledText)) }
             if (current != null) {
                 Box(
                     Modifier.fillMaxWidth().height(44.dp).clip(RoundedCornerShape(22.dp)).tap(label = "Remove budget") { onSave(null) },

@@ -110,7 +110,7 @@ fun CategoryEditor(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = TraceColors.Surface,
+        containerColor = TraceColors.Sheet,
     ) {
         Column(
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).imePadding().navigationBarsPadding()
@@ -181,10 +181,10 @@ fun CategoryEditor(
 
             Box(
                 Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp))
-                    .background(if (canSave) TraceColors.Ink else TraceColors.Ink.copy(alpha = 0.25f))
+                    .background(if (canSave) TraceColors.Ink else TraceColors.DisabledBg)
                     .tap(label = "Save category") { save() },
                 contentAlignment = Alignment.Center,
-            ) { Text(if (existing == null) "Add category" else "Save changes", style = ts(16, 700, TraceColors.OnInk)) }
+            ) { Text(if (existing == null) "Add category" else "Save changes", style = ts(16, 700, if (canSave) TraceColors.OnInk else TraceColors.DisabledText)) }
 
             if (onDelete != null) {
                 Box(

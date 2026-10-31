@@ -189,7 +189,7 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                 Switch(
                     checked = quickAdd, onCheckedChange = null,
                     colors = SwitchDefaults.colors(
-                        checkedTrackColor = TraceColors.Ink, checkedThumbColor = TraceColors.OnInk,
+                        checkedTrackColor = TraceColors.SwitchOn, checkedThumbColor = TraceColors.SwitchThumb,
                         uncheckedTrackColor = TraceColors.Fill, uncheckedBorderColor = TraceColors.Border,
                         uncheckedThumbColor = TraceColors.Faint,
                     ),
