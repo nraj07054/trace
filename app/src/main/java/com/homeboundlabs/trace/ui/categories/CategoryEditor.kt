@@ -184,7 +184,7 @@ fun CategoryEditor(
                     .background(if (canSave) TraceColors.Ink else TraceColors.Ink.copy(alpha = 0.25f))
                     .tap(label = "Save category") { save() },
                 contentAlignment = Alignment.Center,
-            ) { Text(if (existing == null) "Add category" else "Save changes", style = ts(16, 700, Color.White)) }
+            ) { Text(if (existing == null) "Add category" else "Save changes", style = ts(16, 700, TraceColors.OnInk)) }
 
             if (onDelete != null) {
                 Box(

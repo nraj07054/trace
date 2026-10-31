@@ -1,0 +1,9 @@
+<resources>
+    <!-- Night version of Theme.Trace: a dark window while the app starts, so it never flashes white. -->
+    <style name="Theme.Trace" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/trace_night</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

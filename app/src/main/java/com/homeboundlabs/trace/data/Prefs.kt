@@ -29,6 +29,14 @@ class Prefs(context: Context) {
         sp.edit().putString(KEY_NAME, value).apply(); _name.value = value
     }
 
+    private val _themeMode = MutableStateFlow(ThemeMode.from(sp.getString(KEY_THEME, null)))
+    /** Light, dark, or whatever the phone uses. */
+    val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
+
+    fun setThemeMode(value: ThemeMode) {
+        sp.edit().putString(KEY_THEME, value.id).apply(); _themeMode.value = value
+    }
+
     /** Category currently selected in the lock-screen quick-add notification. */
     var quickCategory: Category
         get() = Category.of(sp.getString(KEY_QUICK_CAT, Category.Food.id)!!)
@@ -86,5 +94,14 @@ class Prefs(context: Context) {
         const val KEY_ONBOARDED = "onboarded"
         const val KEY_BUDGETS = "budgets"
         const val KEY_LOCK_VERIFIED = "lock_verified"
+        const val KEY_THEME = "theme"
+    }
+}
+
+enum class ThemeMode(val id: String) {
+    System("system"), Light("light"), Dark("dark");
+
+    companion object {
+        fun from(id: String?): ThemeMode = entries.firstOrNull { it.id == id } ?: System
     }
 }

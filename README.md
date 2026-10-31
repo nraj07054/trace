@@ -9,6 +9,7 @@ Every rupee leaves a trace. A small, private Android expense tracker built with 
 - **Voice add:** tap the mic and say "50 for vada pav". Trace fills in the amount, the note and the category. Speech is recognised on the phone (Android 12+ with an offline language installed); nothing is sent anywhere.
 - **Insights:** highlights, what changed from last month, and monthly budgets per category.
 - **Custom categories**, currency choice (₹ $ € £), and a friendly first-run onboarding and permissions screen.
+- **Dark mode:** light, dark or match the phone. Switching to dark plays a sunset (night comes down from the top); switching back plays a sunrise. In dark mode the Home chart becomes a smooth line graph.
 
 **Private by design:** no account, no bank login. The app has no internet permission at all; everything is stored on your phone.
 

@@ -59,6 +59,7 @@ import com.homeboundlabs.trace.data.Category
 import com.homeboundlabs.trace.data.Money
 import com.homeboundlabs.trace.ui.components.ExpenseRow
 import com.homeboundlabs.trace.ui.components.TIcon
+import com.homeboundlabs.trace.ui.components.ThemeToggle
 import com.homeboundlabs.trace.ui.components.TraceIcons
 import com.homeboundlabs.trace.ui.settings.KOFI_URL
 import com.homeboundlabs.trace.ui.settings.openLink
@@ -124,6 +125,7 @@ private fun Header(name: String, onAvatar: () -> Unit, modifier: Modifier) {
             modifier = Modifier.semantics { heading() },
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            ThemeToggle()
             // Small, optional tip link. Opens Ko-fi in the browser (the app itself has no internet access).
             val context = LocalContext.current
             Box(
@@ -209,13 +211,13 @@ private fun CategoryChips(ui: HomeUi, onPick: (Category?) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    val dot = if (c == null) (if (on) Color.White else TraceColors.Ink) else c.color
+                    val dot = if (c == null) (if (on) TraceColors.OnInk else TraceColors.Ink) else c.color
                     Box(Modifier.size(8.dp).clip(CircleShape).background(dot))
                     Text(c?.label ?: "All", style = ts(12, 600, if (on) TraceColors.ChipSubOn else TraceColors.Muted))
                 }
                 Text(
                     Money.whole(ui.chipTotals.getOrElse(i) { 0L }, ui.currency),
-                    style = ts(15, 800, if (on) Color.White else TraceColors.Ink, letterSpacing = -0.3f),
+                    style = ts(15, 800, if (on) TraceColors.OnInk else TraceColors.Ink, letterSpacing = -0.3f),
                 )
             }
         }
@@ -260,10 +262,10 @@ private fun BottomBar(onAdd: () -> Unit, onInsights: () -> Unit, onSettings: () 
         // Short fade so list rows dissolve above the bar instead of showing through it.
         Spacer(
             Modifier.fillMaxWidth().height(28.dp)
-                .background(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0f), Color.White))),
+                .background(Brush.verticalGradient(listOf(TraceColors.Surface.copy(alpha = 0f), TraceColors.Surface))),
         )
         Row(
-            Modifier.fillMaxWidth().background(Color.White).navigationBarsPadding().height(72.dp).padding(horizontal = 12.dp),
+            Modifier.fillMaxWidth().background(TraceColors.Surface).navigationBarsPadding().height(72.dp).padding(horizontal = 12.dp),
             // Each item gets an equal share of the width, so there's no empty stretch before the + button.
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
@@ -273,10 +275,10 @@ private fun BottomBar(onAdd: () -> Unit, onInsights: () -> Unit, onSettings: () 
             NavIcon(TraceIcons.Settings, "Settings", TraceColors.NavInactive, 24, onSettings)
             Box(
                 Modifier.size(58.dp)
-                    .shadow(20.dp, CircleShape, ambientColor = TraceColors.Ink.copy(alpha = 0.28f), spotColor = TraceColors.Ink.copy(alpha = 0.28f))
+                    .shadow(20.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.28f), spotColor = Color.Black.copy(alpha = 0.28f))
                     .clip(CircleShape).background(TraceColors.Ink).tap(label = "Add expense", onClick = onAdd),
                 contentAlignment = Alignment.Center,
-            ) { TIcon(TraceIcons.Plus, Color.White, 24.dp, contentDescription = "Add expense") }
+            ) { TIcon(TraceIcons.Plus, TraceColors.OnInk, 24.dp, contentDescription = "Add expense") }
         }
     }
 }
@@ -289,18 +291,18 @@ private fun NavIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, label
     ) { TIcon(icon, tint, size.dp, contentDescription = label) }
 }
 
-/** Solid white behind the clock/battery bar that spreads into a soft fade, shown once the page is scrolled. */
+/** Solid page color behind the clock/battery bar that spreads into a soft fade, shown once the page is scrolled. */
 @Composable
 private fun StatusBarFade(visible: Boolean, reduceMotion: Boolean) {
     val alpha by animateFloatAsState(if (visible) 1f else 0f, if (reduceMotion) snap() else tween(200), label = "fade")
     Column(Modifier.fillMaxWidth().graphicsLayer { this.alpha = alpha }) {
-        Spacer(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(Color.White))
+        Spacer(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(TraceColors.Surface))
         Spacer(
             Modifier.fillMaxWidth().height(36.dp).background(
                 Brush.verticalGradient(
-                    0f to Color.White,
-                    0.45f to Color.White.copy(alpha = 0.75f),
-                    1f to Color.White.copy(alpha = 0f),
+                    0f to TraceColors.Surface,
+                    0.45f to TraceColors.Surface.copy(alpha = 0.75f),
+                    1f to TraceColors.Surface.copy(alpha = 0f),
                 ),
             ),
         )

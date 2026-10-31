@@ -73,6 +73,11 @@ fun SpendChart(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Dark mode shows the week as a line instead of bars.
+    if (TraceColors.isDark) {
+        SpendCurve(buckets, selected, filter, currency, reduceMotion, onSelect, modifier)
+        return
+    }
     val totals = buckets.map { it.total(filter) }
     val maxTotal = max(1L, totals.maxOrNull() ?: 1L).toFloat()
     val avg = if (totals.isEmpty()) 0f else totals.sum().toFloat() / totals.size
@@ -173,7 +178,7 @@ private fun Bar(
         if (selected) {
             Text(
                 amountText,
-                style = ts(12, 700, androidx.compose.ui.graphics.Color.White),
+                style = ts(12, 700, TraceColors.OnInk),
                 maxLines = 1,
                 modifier = Modifier
                     .wrapContentWidth(unbounded = true)

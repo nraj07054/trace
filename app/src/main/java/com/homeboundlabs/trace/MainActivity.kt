@@ -9,6 +9,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -31,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -47,7 +50,11 @@ import com.homeboundlabs.trace.ui.onboarding.OnboardingScreen
 import com.homeboundlabs.trace.ui.permissions.Permissions
 import com.homeboundlabs.trace.ui.permissions.PermissionsScreen
 import com.homeboundlabs.trace.ui.settings.SettingsScreen
+import com.homeboundlabs.trace.ui.theme.DarkPalette
+import com.homeboundlabs.trace.ui.theme.LightPalette
+import com.homeboundlabs.trace.ui.theme.ThemeHost
 import com.homeboundlabs.trace.ui.theme.TraceColors
+import com.homeboundlabs.trace.ui.theme.isDarkFor
 import com.homeboundlabs.trace.ui.theme.TraceTheme
 import kotlinx.coroutines.launch
 
@@ -56,12 +63,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val light = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
-        enableEdgeToEdge(light, light)
+        // Start in the right colors, so opening the app never flashes the other theme.
+        val systemDark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        TraceColors.isDark = isDarkFor(traceApp.prefs.themeMode.value, systemDark)
+        applySystemBars(TraceColors.isDark)
         if (savedInstanceState == null) handle(intent)
         setContent {
-            TraceTheme { TraceNav(addRequests.intValue) }
+            ThemeHost(onDark = ::applySystemBars) {
+                TraceTheme { TraceNav(addRequests.intValue) }
+            }
         }
+    }
+
+    /** Status/navigation bar icons and the window behind the app, to match light or dark. */
+    private fun applySystemBars(dark: Boolean) {
+        val clear = android.graphics.Color.TRANSPARENT
+        val style = if (dark) SystemBarStyle.dark(clear) else SystemBarStyle.light(clear, clear)
+        enableEdgeToEdge(style, style)
+        window.setBackgroundDrawable(ColorDrawable((if (dark) DarkPalette else LightPalette).surface.toArgb()))
     }
 
     override fun onNewIntent(intent: Intent) {

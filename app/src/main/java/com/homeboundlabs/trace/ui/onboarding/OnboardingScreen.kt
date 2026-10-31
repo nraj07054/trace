@@ -263,7 +263,7 @@ private fun BottomBar(pager: PagerState, onNext: () -> Unit) {
                 },
                 label = "btnText",
             ) { isLast ->
-                Text(if (isLast) "Start tracing" else "Next", style = ts(16, 700, Color.White))
+                Text(if (isLast) "Start tracing" else "Next", style = ts(16, 700, TraceColors.OnInk))
             }
         }
     }
@@ -422,7 +422,7 @@ private fun SetupPage(
                             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, RoundedCornerShape(18.dp))
                             .tap(role = Role.RadioButton, label = c) { onCurrency(c) },
                         contentAlignment = Alignment.Center,
-                    ) { Text(c, style = ts(18, 800, if (on) Color.White else TraceColors.Ink)) }
+                    ) { Text(c, style = ts(18, 800, if (on) TraceColors.OnInk else TraceColors.Ink)) }
                 }
             }
         }
@@ -440,7 +440,7 @@ private fun SetupPage(
             Switch(
                 checked = quickAdd, onCheckedChange = null,
                 colors = SwitchDefaults.colors(
-                    checkedTrackColor = TraceColors.Ink, checkedThumbColor = Color.White,
+                    checkedTrackColor = TraceColors.Ink, checkedThumbColor = TraceColors.OnInk,
                     uncheckedTrackColor = TraceColors.Fill, uncheckedBorderColor = TraceColors.Border,
                     uncheckedThumbColor = TraceColors.Faint,
                 ),
@@ -489,7 +489,7 @@ private fun BarsArt(active: Boolean, reduceMotion: Boolean) {
                         val tipScale by animateFloatAsState(if (showTip) 1f else 0.6f, tween(400, easing = SpringEasing), label = "tipS")
                         Text(
                             Money.whole(375000L, "₹"),
-                            style = ts(12, 700, Color.White), maxLines = 1,
+                            style = ts(12, 700, TraceColors.OnInk), maxLines = 1,
                             modifier = Modifier
                                 .graphicsLayer { translationY = -(grow() + 10.dp).toPx(); alpha = tipAlpha; scaleX = tipScale; scaleY = tipScale; transformOrigin = TransformOrigin(0.5f, 1f) }
                                 .wrapContentWidth(unbounded = true)

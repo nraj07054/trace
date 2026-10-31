@@ -37,6 +37,8 @@ object TraceIcons {
     val Heart = fill("M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.2 5 6.7 5c2.1 0 3.6 1.2 4.3 2.6h2C13.7 6.2 15.2 5 17.3 5c3.5 0 5.5 3.6 4.2 6.8C19.5 16.4 12 21 12 21z")
     val Code = stroke("M9 7l-5 5 5 5M15 7l5 5-5 5", 2.2f)
     val Bell = stroke("M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0", 2f)
+    val Sun = stroke("M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4l1.4-1.4M18 6l1.4-1.4", 2f)
+    val Moon = stroke("M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9z", 2f)
 
     private val iconCache = HashMap<String, ImageVector>()
     fun category(c: Category) = icon(c.icon)

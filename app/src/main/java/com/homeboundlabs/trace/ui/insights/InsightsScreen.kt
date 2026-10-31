@@ -67,10 +67,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 
-private val Amber = Color(0xFFB45309)
-private val AmberBg = Color(0xFFFFF4E0)
-private val NeutralBg = Color(0xFFEEF1FF)
-private val NeutralFg = Color(0xFF3949AB)
 
 @Composable
 fun InsightsScreen(onBack: () -> Unit, vm: InsightsViewModel = viewModel()) {
@@ -169,9 +165,9 @@ private fun Highlights(items: List<Highlight>, reduceMotion: Boolean) {
             }
             val (bg, fg) = when (h.tone) {
                 Highlight.Tone.Good -> TraceColors.PositiveBg to TraceColors.Positive
-                Highlight.Tone.Warn -> AmberBg to Amber
+                Highlight.Tone.Warn -> TraceColors.WarnBg to TraceColors.Warn
                 Highlight.Tone.Bad -> TraceColors.NegativeBg to TraceColors.Negative
-                Highlight.Tone.Neutral -> NeutralBg to NeutralFg
+                Highlight.Tone.Neutral -> TraceColors.InfoBg to TraceColors.Info
             }
             Column(
                 Modifier.width(if (items.size == 1) 316.dp else 250.dp).height(132.dp)
@@ -358,7 +354,7 @@ private fun BudgetSheet(
                     .background(if (minor > 0) TraceColors.Ink else TraceColors.Ink.copy(alpha = 0.25f))
                     .tap(label = "Save budget") { if (minor > 0) onSave(minor) },
                 contentAlignment = Alignment.Center,
-            ) { Text(if (current == null) "Set budget" else "Save budget", style = ts(16, 700, Color.White)) }
+            ) { Text(if (current == null) "Set budget" else "Save budget", style = ts(16, 700, TraceColors.OnInk)) }
             if (current != null) {
                 Box(
                     Modifier.fillMaxWidth().height(44.dp).clip(RoundedCornerShape(22.dp)).tap(label = "Remove budget") { onSave(null) },
