@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
@@ -51,7 +52,9 @@ import com.homeboundlabs.trace.ui.components.CircleButton
 import com.homeboundlabs.trace.ui.components.TIcon
 import com.homeboundlabs.trace.ui.components.TraceIcons
 import com.homeboundlabs.trace.ui.components.tap
+import com.homeboundlabs.trace.ui.theme.ThemeOrigin
 import com.homeboundlabs.trace.ui.theme.TraceColors
+import com.homeboundlabs.trace.ui.theme.themeOrigin
 import com.homeboundlabs.trace.ui.theme.ts
 import kotlinx.coroutines.launch
 
@@ -141,11 +144,15 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                     val on = m == mode
                     val shape = RoundedCornerShape(18.dp)
                     val fg = if (on) TraceColors.OnInk else TraceColors.Ink
+                    val center = remember { arrayOf(Offset.Unspecified) }
                     Column(
-                        Modifier.weight(1f).height(64.dp).clip(shape)
+                        Modifier.weight(1f).height(64.dp).themeOrigin { center[0] = it }.clip(shape)
                             .background(if (on) TraceColors.Ink else TraceColors.Surface)
                             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
-                            .tap(role = Role.RadioButton, label = label) { app.prefs.setThemeMode(m) },
+                            .tap(role = Role.RadioButton, label = label) {
+                                ThemeOrigin.set(center[0])
+                                app.prefs.setThemeMode(m)
+                            },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
                     ) {
