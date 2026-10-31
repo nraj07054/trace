@@ -30,6 +30,12 @@ app/src/main/java/com/homeboundlabs/trace/
 app/schemas/    Room schema history (used for migrations)
 ```
 
+## Support
+
+Trace is free, with no ads and no sign-up. If it helps you, a coffee keeps it going ☕
+
+<a href="https://ko-fi.com/hey_nikhilraj"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support Trace on Ko-fi" height="36"></a>
+
 ## License
 
 Trace is free software, licensed under the [GNU General Public License v3.0](LICENSE).
