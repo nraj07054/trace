@@ -54,6 +54,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.homeboundlabs.trace.ui.theme.Motion
 import com.homeboundlabs.trace.data.Prefs
 import com.homeboundlabs.trace.quickadd.QuickAdd
 import com.homeboundlabs.trace.quickadd.Voice
@@ -224,7 +225,7 @@ private fun PermissionCard(
     LaunchedEffect(Unit) {
         if (!reduceMotion) {
             delay(120L * index)
-            pop.animateTo(1f, tween(550, easing = SpringEasing))
+            pop.animateTo(1f, tween(Motion.SLOW, easing = SpringEasing))
         }
     }
     Column(
@@ -244,7 +245,7 @@ private fun PermissionCard(
         Text(promise, style = ts(12, 600, TraceColors.Muted))
         AnimatedContent(
             targetState = status,
-            transitionSpec = { (fadeIn(tween(200)) + scaleIn(tween(350, easing = SpringEasing), initialScale = 0.85f)) togetherWith fadeOut(tween(120)) },
+            transitionSpec = { (fadeIn(tween(Motion.QUICK)) + scaleIn(tween(Motion.STANDARD, easing = SpringEasing), initialScale = 0.85f)) togetherWith fadeOut(tween(Motion.QUICK)) },
             label = "status",
         ) { s ->
             when (s) {

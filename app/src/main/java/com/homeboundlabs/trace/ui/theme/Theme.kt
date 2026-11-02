@@ -49,11 +49,9 @@ class Palette(
     val warnBg: Color,
     val info: Color,
     val infoBg: Color,
-    val dash: Color,
     val emptyBar: Color,
     val navInactive: Color,
     val avatarText: Color,
-    val chipSubOn: Color,
     /** Keypad keys: one step up from the page, so they read as buttons. */
     val key: Color,
     /** Small round buttons such as the month and date arrows. */
@@ -88,11 +86,9 @@ val LightPalette = Palette(
     warnBg = Color(0xFFFFF4E0),
     info = Color(0xFF3949AB),
     infoBg = Color(0xFFEEF1FF),
-    dash = Color(0xFFD9DCE3),
     emptyBar = Color(0xFFE6E8EE),
     navInactive = Color(0xFFA1A6B3),
     avatarText = Color(0xFF4A4F5C),
-    chipSubOn = Color(0xFFC9CCD4),
     key = Color(0xFFF7F8FA),
     roundButton = Color(0xFFF1F2F5),
     disabledBg = Color(0x400E0F12),
@@ -123,11 +119,9 @@ val DarkPalette = Palette(
     warnBg = Color(0xFF2A2110),
     info = Color(0xFF9AA8FF),
     infoBg = Color(0xFF1A1E36),
-    dash = Color(0xFF2A2D35),
     emptyBar = Color(0xFF23262D),
     navInactive = Color(0xFF6E7480),
     avatarText = Color(0xFFC9CDD6),
-    chipSubOn = Color(0xFF4A4F5C),
     key = Color(0xFF1D2026),
     roundButton = Color(0xFF1D2026),
     disabledBg = Color(0xFF1D2026),
@@ -166,11 +160,9 @@ object TraceColors {
     val WarnBg: Color get() = p.warnBg
     val Info: Color get() = p.info
     val InfoBg: Color get() = p.infoBg
-    val Dash: Color get() = p.dash
     val EmptyBar: Color get() = p.emptyBar
     val NavInactive: Color get() = p.navInactive
     val AvatarText: Color get() = p.avatarText
-    val ChipSubOn: Color get() = p.chipSubOn
     val Key: Color get() = p.key
     val RoundButton: Color get() = p.roundButton
     val DisabledBg: Color get() = p.disabledBg

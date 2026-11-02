@@ -31,6 +31,8 @@ object QuickAdd {
     const val EXTRA_CATEGORY = "category"
     const val KEY_AMOUNT = "amount"
     const val ACTION_SAVE = "com.homeboundlabs.trace.action.QUICK_SAVE"
+    /** Sent when the shortcut is cleared; it's put straight back while the setting is on. */
+    const val ACTION_RESTORE = "com.homeboundlabs.trace.action.QUICK_RESTORE"
 
     fun ensureChannel(context: Context) {
         val nm = context.getSystemService(NotificationManager::class.java)
@@ -85,6 +87,15 @@ object QuickAdd {
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(quickAddIntent(context, null))
+            // Android 14+ lets people clear ongoing notifications, and some phones' "Clear all"
+            // does too (Samsung). The shortcut then comes straight back; Settings turns it off.
+            .setDeleteIntent(
+                PendingIntent.getBroadcast(
+                    context, 11,
+                    Intent(context, QuickAddReceiver::class.java).setAction(ACTION_RESTORE),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                ),
+            )
             .addAction(reply)
             .setOngoing(true)
             .setSilent(true)
@@ -94,6 +105,7 @@ object QuickAdd {
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
+            .apply { flags = flags or android.app.Notification.FLAG_NO_CLEAR } // skipped by "Clear all"
 
         try {
             NotificationManagerCompat.from(context).notify(ID, n)

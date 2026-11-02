@@ -19,8 +19,12 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import com.homeboundlabs.trace.ui.theme.EmphasizedEasing
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -37,12 +41,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -70,6 +71,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.homeboundlabs.trace.ui.theme.Motion
 import com.homeboundlabs.trace.MainActivity
 import com.homeboundlabs.trace.data.Categories
 import com.homeboundlabs.trace.data.Category
@@ -83,9 +85,6 @@ import com.homeboundlabs.trace.ui.theme.SpringEasing
 import com.homeboundlabs.trace.ui.theme.TraceTheme
 import com.homeboundlabs.trace.ui.theme.ts
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 /**
  * The lock-screen quick-add from Main.dc.html. It is shown over the keyguard (showWhenLocked),
@@ -106,7 +105,7 @@ class QuickAddActivity : ComponentActivity() {
         if (getSystemService(KeyguardManager::class.java).isKeyguardLocked) traceApp.prefs.lockScreenVerified = true
 
         val initial = intent.getStringExtra(QuickAdd.EXTRA_CATEGORY)?.let(Category::of)
-        setContent { TraceTheme { QuickAddScreen(initial, onClose = ::finish, onOpenApp = ::openApp) } }
+        setContent { TraceTheme { QuickAddScreen(initial, onFinish = ::finish, onOpenApp = ::openApp) } }
     }
 
     /** Opening the full app needs the device unlocked; ask the keyguard first. */
@@ -131,8 +130,12 @@ private val Dim = Color(0xFF4A4F5C)
 private val Inactive = Color(0xFF8A8F9C)
 
 @Composable
-private fun QuickAddScreen(initial: Category?, onClose: () -> Unit, onOpenApp: () -> Unit) {
+private fun QuickAddScreen(initial: Category?, onFinish: () -> Unit, onOpenApp: () -> Unit) {
     val app = androidx.compose.ui.platform.LocalContext.current.traceApp
+    // The box rises from the bottom when it opens and slides back down before the screen closes.
+    val shown = remember { MutableTransitionState(false).apply { targetState = true } }
+    val onClose: () -> Unit = { shown.targetState = false }
+    LaunchedEffect(shown.isIdle, shown.currentState) { if (shown.isIdle && !shown.currentState) onFinish() }
     val currency = app.prefs.currency.value
     val scope = rememberCoroutineScope()
     var amount by rememberSaveable { mutableStateOf("") }
@@ -235,33 +238,41 @@ private fun QuickAddScreen(initial: Category?, onClose: () -> Unit, onOpenApp: (
     }
 
     // Transparent window: the real lock screen stays visible; only the box floats on top.
-    // Tapping anywhere outside the box closes it.
+    // Tapping anywhere outside the box closes it. The box sits at the bottom, within thumb reach.
     Box(
         Modifier.fillMaxSize()
             .clickable(interactionSource = null, indication = null, onClick = onClose)
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .navigationBarsPadding(),
+        contentAlignment = Alignment.BottomCenter,
     ) {
         // 0 = add box, 1 = listening (shrunk to the voice row), 2 = saved confirmation.
         val stage = when { done -> 2; listening -> 1; else -> 0 }
-        AnimatedContent(
-            targetState = stage,
-            transitionSpec = { (fadeIn(tween(220)) + scaleIn(initialScale = 0.96f)) togetherWith fadeOut(tween(150)) },
-            label = "card",
-        ) { s ->
-            when (s) {
-                2 -> DoneCard(cat, savedMinor, todayTotal, currency, onOpenApp) {
-                    amount = ""; note = ""; done = false
+        AnimatedVisibility(
+            visibleState = shown,
+            enter = slideInVertically(tween(Motion.STANDARD, easing = EmphasizedEasing)) { it } + fadeIn(tween(Motion.QUICK)),
+            exit = slideOutVertically(tween(Motion.STANDARD, easing = EmphasizedEasing)) { it } + fadeOut(tween(Motion.QUICK)),
+        ) {
+            AnimatedContent(
+                targetState = stage,
+                transitionSpec = { (fadeIn(tween(Motion.QUICK)) + scaleIn(initialScale = 0.96f)) togetherWith fadeOut(tween(Motion.QUICK)) },
+                label = "card",
+            ) { s ->
+                when (s) {
+                    2 -> DoneCard(cat, savedMinor, todayTotal, currency, onOpenApp) {
+                        amount = ""; note = ""; done = false
+                    }
+                    1 -> ListeningCard(heardText, level, onStop = ::stopListening, onCancel = ::cancelListening)
+                    else -> EditCard(
+                        amount, cat, currency, minor > 0,
+                        onPick = { catId = it.id },
+                        categories = categories,
+                        onKey = { amount = Money.press(amount, it).take(7) },
+                        onSave = ::save, onClose = onClose,
+                        showMic = voiceLang != null, onMic = ::onMic,
+                        note = note, hint = voiceHint,
+                    )
                 }
-                1 -> ListeningCard(heardText, level, onStop = ::stopListening, onCancel = ::cancelListening)
-                else -> EditCard(
-                    amount, cat, currency, minor > 0,
-                    onPick = { catId = it.id },
-                    categories = categories,
-                    onKey = { amount = Money.press(amount, it).take(7) },
-                    onSave = ::save, onClose = onClose,
-                    showMic = voiceLang != null, onMic = ::onMic,
-                    note = note, hint = voiceHint,
-                )
             }
         }
     }
@@ -300,8 +311,9 @@ private fun EditCard(
                 style = ts(12, 600, Sub, 0.3f),
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Mic lives in the header so the amount row keeps its full width.
-                if (showMic) HeaderButton(TraceIcons.Mic, "Add by voice", 14.dp, onMic)
+                // Voice lives in the header so the amount row keeps its full width; a labelled
+                // orange pill, so it doesn't read as a second close button.
+                if (showMic) SpeakButton(onMic)
                 HeaderButton(TraceIcons.Close, "Cancel", 12.dp, onClose)
             }
         }
@@ -331,7 +343,7 @@ private fun EditCard(
             categories.forEach { c ->
                 val on = c.id == cat.id
                 val bg by animateColorAsState(if (on) Raised else Color.Transparent, label = "bg")
-                val scale by animateFloatAsState(if (on) 1.08f else 1f, tween(300, easing = SpringEasing), label = "scale")
+                val scale by animateFloatAsState(if (on) 1.08f else 1f, tween(Motion.STANDARD, easing = SpringEasing), label = "scale")
                 Column(
                     Modifier.width(76.dp).clip(RoundedCornerShape(18.dp)).background(bg)
                         .tap(role = Role.RadioButton, label = c.label) { onPick(c) }
@@ -357,7 +369,25 @@ private fun EditCard(
     }
 }
 
-/** Small round button for the box's header (mic, ✕); 44dp touch target around a 28dp circle. */
+/** "🎤 Speak": starts voice entry. A 44dp-tall touch target around a 32dp pill. */
+@Composable
+private fun SpeakButton(onClick: () -> Unit) {
+    Box(
+        Modifier.height(44.dp).clip(RoundedCornerShape(22.dp)).tap(label = "Add by voice", onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            Modifier.height(32.dp).clip(RoundedCornerShape(16.dp)).background(ListenOrange.copy(alpha = 0.16f)).padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            TIcon(TraceIcons.Mic, ListenOrange, 15.dp)
+            Text("Speak", style = ts(13, 700, ListenOrange))
+        }
+    }
+}
+
+/** Small round button for the box's header (✕); 44dp touch target around a 28dp circle. */
 @Composable
 private fun HeaderButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, iconSize: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
     Box(

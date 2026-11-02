@@ -1,7 +1,5 @@
 package com.homeboundlabs.trace.data
 
-import android.icu.text.NumberFormat
-import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToLong
 
@@ -9,11 +7,17 @@ val CURRENCIES = listOf("₹", "$", "€", "£")
 
 /** Formats amounts as in the designs: symbol + grouped whole number, Indian grouping (1,23,456) for ₹. */
 object Money {
-    private val inFormat = NumberFormat.getIntegerInstance(Locale.forLanguageTag("en-IN"))
-    private val usFormat = NumberFormat.getIntegerInstance(Locale.US)
-
-    fun group(whole: Long, currency: String): String =
-        (if (currency == "₹") inFormat else usFormat).format(whole)
+    /** "1,23,456" for ₹ (last three digits, then pairs); "123,456" otherwise. */
+    fun group(whole: Long, currency: String): String {
+        val digits = abs(whole).toString()
+        val head = if (currency == "₹") digits.dropLast(3) else ""
+        val tail = if (currency == "₹") digits.takeLast(3) else digits
+        val grouped = buildString {
+            if (head.isNotEmpty()) append(head.reversed().chunked(2).joinToString(",").reversed()).append(',')
+            append(tail.reversed().chunked(3).joinToString(",").reversed())
+        }
+        return if (whole < 0) "-$grouped" else grouped
+    }
 
     /** Rounded to whole units, e.g. "₹2,140". */
     fun whole(minor: Long, currency: String): String = currency + group((minor / 100.0).roundToLong(), currency)

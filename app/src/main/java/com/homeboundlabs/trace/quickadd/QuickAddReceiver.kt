@@ -4,11 +4,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import com.homeboundlabs.trace.data.Category
 import com.homeboundlabs.trace.traceApp
 import kotlinx.coroutines.launch
 
-/** Handles the shortcut's inline reply, and re-posting after boot/update. */
+/** Handles the shortcut's inline reply, and re-posting after boot/update or after it's cleared. */
 class QuickAddReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val app = context.traceApp
@@ -32,6 +31,11 @@ class QuickAddReceiver : BroadcastReceiver() {
                                 QuickAdd.refresh(context)
                             }
                         }
+                    }
+                    QuickAdd.ACTION_RESTORE -> {
+                        // Let the clear finish first, so the new post isn't swept up with it.
+                        kotlinx.coroutines.delay(500)
+                        QuickAdd.refresh(context)
                     }
                     else -> QuickAdd.refresh(context)
                 }

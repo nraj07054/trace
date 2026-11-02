@@ -40,6 +40,10 @@ img { max-width: 100%; height: auto; display: block; }
 h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 1.02; text-wrap: balance; margin: 0; }
 p { margin: 0; }
 .dot { color: var(--accent); }
+/* The wordmark's dot is round, to the app icon's proportions: 0.213 em across, its bottom 0.021 em
+   below the baseline (the content box ends 0.222 em below it in Plus Jakarta Sans). */
+.logo .dot { position: relative; color: transparent; }
+.logo .dot::after { content: ""; position: absolute; left: 50%; bottom: .201em; width: .213em; height: .213em; margin-left: -.1065em; border-radius: 50%; background: var(--accent); }
 .note { font-family: var(--hand); font-size: 22px; line-height: 1.1; color: var(--muted); }
 
 /* ---------- nav ---------- */
@@ -121,8 +125,6 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .pill { border: 0; background: transparent; font: 700 13px/1 var(--body); color: var(--faint); padding: 10px 14px; border-radius: 999px; cursor: pointer; min-width: 44px; }
 .pill[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .chart { position: relative; height: 240px; margin-top: 26px; display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; }
-.avg { position: absolute; left: 0; right: 0; border-top: 1.5px dashed #CDD1DA; transition: bottom .5s ease; pointer-events: none; }
-.avg span { position: absolute; right: 0; bottom: 4px; font-size: 11px; font-weight: 700; color: var(--faint); }
 .col { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; cursor: pointer; border: 0; background: none; padding: 0; font: inherit; }
 .bar { width: min(34px, 80%); border-radius: 999px; overflow: hidden; display: flex; flex-direction: column; background: #E6E8EE; transition: height .6s var(--spring), transform .35s var(--spring); transform-origin: bottom center; }
 .bar i { display: block; transition: opacity .3s ease, flex-grow .6s var(--spring); opacity: .3; }
@@ -148,7 +150,10 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- lock screen demo ---------- */
-.lock-scene { position: relative; border-radius: 40px; background: var(--lock); padding: 26px 18px 30px; overflow: hidden; min-height: 600px; isolation: isolate; }
+.lock-scene { position: relative; border-radius: 40px; background: var(--lock); padding: 26px 18px 30px; overflow: hidden; min-height: 600px; isolation: isolate; display: flex; flex-direction: column; }
+/* As in the app: the clock up top, the add box at the bottom within thumb reach. */
+.lock-scene .clock { order: 1; }
+#lockUi { order: 2; margin-top: auto; }
 .lock-scene::before, .lock-scene::after { content: ""; position: absolute; border-radius: 50%; z-index: -1; }
 .lock-scene::before { width: 420px; height: 420px; left: -160px; bottom: -120px; background: #232836; }
 .lock-scene::after { width: 300px; height: 300px; right: -120px; top: 140px; background: #1D2230; }
@@ -156,11 +161,14 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .clock small { display: block; font-weight: 600; color: #D5D8E0; font-size: 16px; }
 .clock div { font: 700 84px/1 var(--body); letter-spacing: -4px; font-variant-numeric: tabular-nums; }
 .lockcard { background: #000; color: #fff; border-radius: 30px; padding: 16px; display: grid; gap: 14px; box-shadow: 0 14px 34px rgba(0,0,0,.45); margin-top: 26px; transition: transform .45s var(--spring); }
+.lockcard.rise { animation: rise .3s cubic-bezier(.2, 0, 0, 1); }
+@keyframes rise { from { transform: translateY(60px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .lockcard.rise { animation: none; } }
 .lc-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: #A1A6B3; letter-spacing: .3px; }
 .lc-head b { color: #fff; font-weight: 800; }
-.mic { width: 34px; height: 34px; border-radius: 50%; border: 0; background: #1E2128; display: grid; place-items: center; cursor: pointer; transition: transform .3s var(--spring); }
-.mic:hover { transform: scale(1.08); }
-.mic svg { width: 16px; height: 16px; fill: none; stroke: #A1A6B3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.speak { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 16px; border: 0; background: rgba(255,122,69,.16); color: #FF7A45; font: 700 13px/1 var(--body); cursor: pointer; transition: transform .3s var(--spring); }
+.speak:hover { transform: scale(1.05); }
+.speak svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .lc-listen { color: #FF7A45; }
 .listen-row { display: flex; align-items: center; gap: 14px; }
 .vbars { display: flex; align-items: center; gap: 4px; height: 36px; }
@@ -225,7 +233,10 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .ride-note { margin-top: 22px; display: flex; gap: 10px; align-items: center; }
 
 /* ---------- gallery ---------- */
-.gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; margin-top: 44px; }
+.gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 44px; max-width: 860px; margin-inline: auto; }
+/* The lock-screen box sits at the bottom of a dark screen, as on the phone. */
+.gallery .phone.lockbox { aspect-ratio: 740 / 1620; display: flex; align-items: flex-end; background: var(--lock); }
+.gallery .phone.lockbox img { aspect-ratio: 656 / 938; border-radius: 10% / 7%; background: #000; }
 .gallery figure { margin: 0; display: grid; gap: 12px; transition: transform .45s var(--spring); }
 .gallery figure:hover { transform: translateY(-8px) rotate(-1.5deg); }
 .gallery figure:nth-child(even):hover { transform: translateY(-8px) rotate(1.5deg); }
@@ -233,7 +244,7 @@ section { padding-block: 72px; scroll-margin-top: 60px; }
 .gallery .phone img { border-radius: 26px; }
 .gallery figcaption { font-weight: 700; text-align: center; }
 .gallery figcaption span { display: block; font-weight: 500; color: var(--muted); font-size: 14px; }
-@media (max-width: 860px) { .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ---------- privacy ---------- */
 .promise { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 40px; }
@@ -344,6 +355,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <a class="logo" href="#top" aria-label="Trace home">Trace<span class="dot">.</span></a>
     <nav class="nav-links" aria-label="Sections">
       <a href="#chart">The chart</a>
+      <a href="#insights">Insights</a>
       <a href="#lock">Lock screen</a>
       <a href="#categories">Categories</a>
       <a class="btn btn-sm" href="https://github.com/nraj07054/trace/releases/latest/download/Trace.apk" data-goatcounter-click="download-apk-nav" data-goatcounter-title="Download APK (top bar)">Get the APK</a>
@@ -373,7 +385,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       </div>
       <div class="hero-art">
         <p class="note hero-note" aria-hidden="true">the real app ↓</p>
-        <div class="phone"><img src="img/home.jpg" alt="Trace home screen: ₹13,310 spent this week, with a stacked bar chart of daily spending and recent expenses" width="720" height="1600"></div>
+        <div class="phone"><img src="img/home.jpg" alt="Trace home screen: ₹1,01,238 spent in 6 months, as stacked bars by category" width="720" height="1600"></div>
         <div class="sticker s1"><i style="background:var(--food)"></i>Lunch <b>−₹450</b></div>
         <div class="sticker s2"><i style="background:var(--fun)"></i>Wonderla rides <b>−₹1,899</b></div>
         <div class="sticker s3">↘ 10% less than last week</div>
@@ -410,15 +422,36 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
               <button class="pill" type="button" data-p="1Y" aria-pressed="false">1Y</button>
             </div>
           </div>
-          <div class="chart" id="chartBars"><div class="avg" id="avg"><span id="avgText"></span></div></div>
+          <div class="chart" id="chartBars"></div>
           <div class="labels" id="chartLabels"></div>
           <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
         </div>
         <div class="facts">
           <div class="fact"><div class="ico" style="background:#FFE9DF;color:var(--food)"><svg><use href="#i-food"/></svg></div><div><b>Stacked by category</b><span>Food, Travel, Shopping, Bills, Fun, and any you add yourself.</span></div></div>
-          <div class="fact"><div class="ico" style="background:#E6EFFF;color:var(--travel)"><svg><use href="#i-travel"/></svg></div><div><b>Week, month, 6 months, year</b><span>Switch the view and the bars spring to their new heights.</span></div></div>
+          <div class="fact"><div class="ico" style="background:#E6EFFF;color:var(--travel)"><svg><use href="#i-travel"/></svg></div><div><b>Week, month, 6 months, year</b><span>Weeks start on Monday and months on the 1st, so every view resets when a new one begins.</span></div></div>
           <div class="fact"><div class="ico" style="background:#F1EBFE;color:var(--shop)"><svg><use href="#i-shop"/></svg></div><div><b>One tap to filter</b><span>Pick a category and the chart and the recent list show only that.</span></div></div>
           <div class="fact"><div class="ico" style="background:#E8F7EE;color:#12804A"><svg><use href="#i-check"/></svg></div><div><b>Up or down at a glance</b><span>A little badge compares this week with the last one.</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="insights">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Insights</p>
+        <h2>Your month, in plain words.</h2>
+        <p>No walls of text. One tip to plan with, how this month compares with the same days last month, and a nudge only when something is off.</p>
+      </div>
+      <div class="split">
+        <div class="phones-pair">
+          <div class="phone" style="width:min(290px, 80%);transform:rotate(-2deg)"><img src="img/insights.jpg" alt="Insights for October: a tip to set a Shopping budget, ₹22,487 spent, ₹2,403 more than September, and each category against last month" width="720" height="1600" loading="lazy"></div>
+        </div>
+        <div class="facts">
+          <div class="fact"><div class="ico" style="background:#FFE9DF;color:var(--food)"><svg><use href="#i-bolt"/></svg></div><div><b>A tip to plan with</b><span>Like “Shopping was ₹5,742 in October with no budget. Set ₹5,800 for November?”, with one tap to do it.</span></div></div>
+          <div class="fact"><div class="ico" style="background:#E6EFFF;color:var(--travel)"><svg><use href="#i-check"/></svg></div><div><b>Fair comparisons</b><span>Nov 1–14 against Oct 1–14, never a full month against a few days. Each category shows its own bars with the month written beside them.</span></div></div>
+          <div class="fact"><div class="ico" style="background:#F1EBFE;color:var(--shop)"><svg><use href="#i-shop"/></svg></div><div><b>Monthly budgets</b><span>Set a limit per category. On Home the chips fill up like a tank as you spend, and a bar with a “today” line shows if you're on pace.</span></div></div>
+          <div class="fact"><div class="ico" style="background:#E8F7EE;color:#12804A"><svg><use href="#i-heart"/></svg></div><div><b>Quiet when all is well</b><span>One warning at most, only when something is really off. The first days of a month open on last month's full report instead.</span></div></div>
         </div>
       </div>
     </div>
@@ -429,7 +462,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <div class="sec-head">
         <p class="eyebrow">Lock screen</p>
         <h2>Paid for chai? Log it before you unlock.</h2>
-        <p>Trace keeps one small, silent line on your lock screen. Tap it and the add box opens right there, with your phone still locked. Type the amount, or tap the mic and just say it. Try both below.</p>
+        <p>Trace keeps one small, silent line on your lock screen. Tap it and the add box slides up right there, with your phone still locked. Type the amount, or tap Speak and just say it. Try both below.</p>
       </div>
       <div class="split">
         <div class="lock-scene" id="lockScene">
@@ -439,8 +472,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         </div>
         <div>
           <div class="steps">
-            <div class="step"><div><b>Wake your phone</b><span>No PIN, no fingerprint. Trace's line is waiting with your notifications.</span></div></div>
-            <div class="step"><div><b>Tap “Add an expense”</b><span>The black box pops up over the lock screen. Type the amount, or tap 🎙 and say “50 for vada pav”: Trace fills in the amount, the category and what it was for. Speech is understood on your phone, never online.</span></div></div>
+            <div class="step"><div><b>Wake your phone</b><span>No PIN, no fingerprint. Trace's line is waiting with your notifications, and it stays put when you tap “Clear all”.</span></div></div>
+            <div class="step"><div><b>Tap “Add an expense”</b><span>The black box slides up from the bottom, within thumb reach. Type the amount, or tap “Speak” and say “50 for vada pav”: Trace fills in the amount, the category and what it was for. Speech is understood on your phone, never online.</span></div></div>
             <div class="step"><div><b>Hit ✓ and you're done</b><span>It's saved and the phone stays locked. Opening the full app is the only thing that asks you to unlock.</span></div></div>
           </div>
           <p class="note lock-note">works even when you're in a hurry at the counter :)</p>
@@ -484,9 +517,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <h2>Light, quick, and nothing extra.</h2>
       </div>
       <div class="gallery">
-        <figure><div class="phone"><img src="img/home.jpg" alt="Home screen with the weekly chart" width="720" height="1600" loading="lazy"></div><figcaption>Home<span>Your week at a glance</span></figcaption></figure>
+        <figure><div class="phone"><img src="img/home.jpg" alt="Home screen with six months of spending as stacked bars" width="720" height="1600" loading="lazy"></div><figcaption>Home<span>Where your money went</span></figcaption></figure>
+        <figure><div class="phone"><img src="img/insights.jpg" alt="Insights for October with a planning tip and categories against September" width="720" height="1600" loading="lazy"></div><figcaption>Insights<span>Your month, compared fairly</span></figcaption></figure>
+        <figure><div class="phone lockbox"><img src="img/lockbox.jpg" alt="The black add box with ₹450 in Food and a Speak button" width="656" height="938" loading="lazy"></div><figcaption>Lock screen<span>Log without unlocking</span></figcaption></figure>
+        <figure><div class="phone"><img src="img/home-dark.jpg" alt="Home in dark mode with a smooth spending curve" width="720" height="1600" loading="lazy"></div><figcaption>Dark mode<span>Easy on the eyes at night</span></figcaption></figure>
         <figure><div class="phone"><img src="img/add.jpg" alt="New expense screen with ₹1,899 for Wonderla rides in the Fun category" width="720" height="1600" loading="lazy"></div><figcaption>Add<span>Big keypad, one-tap category</span></figcaption></figure>
-        <figure><div class="phone" style="background:var(--lock)"><img src="img/lockbox.jpg" alt="The black lock-screen add box showing ₹450 in Food" width="680" height="822" loading="lazy" style="aspect-ratio:auto;border-radius:30px;margin-block:38% "></div><figcaption>Lock screen<span>Log without unlocking</span></figcaption></figure>
         <figure><div class="phone"><img src="img/categories.jpg" alt="Categories screen" width="720" height="1600" loading="lazy"></div><figcaption>Categories<span>Add your own</span></figcaption></figure>
       </div>
     </div>
@@ -576,22 +611,23 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   /* ---------- live chart (numbers match the app screenshots) ---------- */
   const DATA = {
+    // Calendar periods, as in the app: the week runs Monday to Sunday, the month is its weeks
+    // from the 1st, and the year is January to December.
     '1W': { label: 'this week', bars: [
-      ['Thu', [180, 60, 0, 2450, 0]], ['Fri', [890, 320, 0, 0, 1899]], ['Sat', [610, 240, 0, 0, 0]], ['Sun', [260, 90, 1299, 0, 0]],
-      ['Mon', [420, 180, 0, 0, 0]], ['Tue', [1240, 410, 2100, 0, 0]], ['Wed', [450, 212, 0, 0, 0]] ] },
+      ['Mon', [420, 180, 0, 0, 0]], ['Tue', [1240, 410, 2100, 0, 0]], ['Wed', [450, 212, 0, 0, 0]], ['Thu', [180, 60, 0, 2450, 0]],
+      ['Fri', [890, 320, 0, 0, 1899]], ['Sat', [610, 240, 0, 0, 0]], ['Sun', [260, 90, 1299, 0, 0]] ] },
     '1M': { label: 'this month', bars: [
-      ['W1', [3200, 1100, 2400, 2450, 600]], ['W2', [2800, 900, 1500, 0, 0]], ['W3', [4100, 1300, 3600, 1200, 1200]], ['W4', [4050, 1512, 3399, 2450, 4408]] ] },
+      ['W1', [3200, 1100, 2400, 2450, 600]], ['W2', [2800, 900, 1500, 0, 0]], ['W3', [4100, 1300, 3600, 1200, 1200]], ['W4', [4050, 1512, 3399, 2450, 4408]], ['W5', [1300, 420, 0, 599, 0]] ] },
     '6M': { label: 'in 6 months', bars: [
       ['May', [13200, 4800, 9100, 6200, 1200]], ['Jun', [12100, 4200, 6400, 6900, 800]], ['Jul', [14800, 5100, 12200, 7100, 2600]],
-      ['Aug', [11900, 4600, 7300, 6600, 900]], ['Sep', [15200, 5300, 10400, 7400, 1800]], ['Oct', [6090, 2032, 3399, 2450, 4408]] ] },
+      ['Aug', [11900, 4600, 7300, 6600, 900]], ['Sep', [15200, 5300, 10400, 7400, 1800]], ['Oct', [16090, 5032, 9399, 6450, 4408]] ] },
     '1Y': { label: 'this year', bars: [
-      ['N', [12600, 4100, 8800, 6100, 900]], ['D', [16900, 5200, 15400, 6300, 3100]], ['J', [11800, 4300, 6100, 6800, 700]], ['F', [10900, 3900, 5200, 6500, 500]],
-      ['M', [12400, 4500, 7900, 6400, 1100]], ['A', [13100, 4700, 8200, 6300, 1500]], ['M', [13200, 4800, 9100, 6200, 1200]], ['J', [12100, 4200, 6400, 6900, 800]],
-      ['J', [14800, 5100, 12200, 7100, 2600]], ['A', [11900, 4600, 7300, 6600, 900]], ['S', [15200, 5300, 10400, 7400, 1800]], ['O', [6090, 2032, 3399, 2450, 4408]] ] },
+      ['J', [11800, 4300, 6100, 6800, 700]], ['F', [10900, 3900, 5200, 6500, 500]], ['M', [12400, 4500, 7900, 6400, 1100]], ['A', [13100, 4700, 8200, 6300, 1500]],
+      ['M', [13200, 4800, 9100, 6200, 1200]], ['J', [12100, 4200, 6400, 6900, 800]], ['J', [14800, 5100, 12200, 7100, 2600]], ['A', [11900, 4600, 7300, 6600, 900]],
+      ['S', [15200, 5300, 10400, 7400, 1800]], ['O', [16090, 5032, 9399, 6450, 4408]], ['N', [12600, 4100, 8800, 6100, 900]], ['D', [16900, 5200, 15400, 6300, 3100]] ] },
   };
-  const state = { period: '1W', cat: 'all', sel: 5 };
+  const state = { period: '1W', cat: 'all', sel: 1 };
   const barsEl = document.getElementById('chartBars'), labelsEl = document.getElementById('chartLabels');
-  const avgEl = document.getElementById('avg'), avgText = document.getElementById('avgText');
   const totalEl = document.getElementById('total'), spentEl = document.getElementById('spentLabel');
   const chipsEl = document.getElementById('chips');
   const H = 180, MIN = 12;
@@ -619,7 +655,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     const ci = CATS.findIndex(c => c.id === state.cat);
     const totals = p.bars.map(([, v]) => ci < 0 ? v.reduce((a, b) => a + b, 0) : v[ci]);
     const max = Math.max(1, ...totals);
-    const sum = totals.reduce((a, b) => a + b, 0), avg = sum / totals.length;
+    const sum = totals.reduce((a, b) => a + b, 0);
     p.bars.forEach(([label, v], i) => {
       const col = cols[i], bar = col.querySelector('.bar'), tip = col.querySelector('.tip');
       const h = Math.max(MIN, Math.round(totals[i] / max * H));
@@ -632,8 +668,6 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       col.setAttribute('aria-pressed', on);
       labelsEl.children[i].classList.toggle('on', on);
     });
-    avgEl.style.bottom = Math.round(avg / max * H) + 'px';
-    avgText.textContent = 'avg ' + inr(avg);
     totalEl.innerHTML = inr(sum) + '<span class="c">.00</span>';
     spentEl.textContent = 'Spent ' + p.label;
     // chip amounts for the period
@@ -663,6 +697,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   const lockUi = document.getElementById('lockUi');
   const scene = document.getElementById('lockScene');
   let amt = '', cat = 0, note = '', todayTotal = 662;
+  let rising = true; // the box slides up when it opens, not on every key press
 
   const fmtAmt = s => {
     const a = s || '0', [w, d] = a.split('.');
@@ -683,8 +718,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     const c = CATS[cat], has = Number(amt) > 0;
     scene.style.setProperty('--cat', c.color);
     lockUi.innerHTML = `
-      <div class="lockcard">
-        <div class="lc-head"><span><b>Trace</b> · ADD EXPENSE</span><button class="mic" type="button" id="micBtn" aria-label="Add by voice (demo)"><svg><use href="#i-mic"/></svg></button></div>
+      <div class="lockcard${rising ? ' rise' : ''}">
+        <div class="lc-head"><span><b>Trace</b> · ADD EXPENSE</span><button class="speak" type="button" id="micBtn" aria-label="Add by voice (demo)"><svg aria-hidden="true"><use href="#i-mic"/></svg>Speak</button></div>
         <div class="lc-amt">
           <output class="${has ? 'has' : ''}" aria-live="polite">${fmtAmt(amt)}</output>
           <button class="save ${has ? 'ready' : ''}" type="button" id="saveBtn" aria-label="Save expense"><svg><use href="#i-check"/></svg></button>
@@ -701,6 +736,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     lockUi.querySelectorAll('.lc-cat').forEach(b => b.addEventListener('click', () => { cat = +b.dataset.i; drawEdit(); }));
     lockUi.querySelector('#saveBtn').addEventListener('click', save);
     lockUi.querySelector('#micBtn').addEventListener('click', listen);
+    rising = false;
   }
 
   // Voice demo: the real app understands speech on the phone; the website just plays an example.
@@ -746,7 +782,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <strong>−${fmtAmt(amt)}</strong>
       </div>
       <button class="again" type="button" id="againBtn">Add another</button>`;
-    lockUi.querySelector('#againBtn').addEventListener('click', () => { amt = ''; note = ''; drawEdit(); });
+    lockUi.querySelector('#againBtn').addEventListener('click', () => { amt = ''; note = ''; rising = true; drawEdit(); });
     burst(c.color);
   }
   amt = '450'; drawEdit();

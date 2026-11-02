@@ -20,8 +20,8 @@ android {
         applicationId = "com.homeboundlabs.trace"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 8
+        versionName = "1.1.4"
     }
 
     signingConfigs {
@@ -41,6 +41,9 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = if (uploadKey != null) signingConfigs.getByName("upload") else signingConfigs.getByName("debug")
+            // Ship native debug symbols inside the bundle, so Play can read crash stacks from
+            // Compose's small native library (and stops warning about missing symbols).
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
         }
     }
 

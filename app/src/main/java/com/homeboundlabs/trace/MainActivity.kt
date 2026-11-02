@@ -1,30 +1,34 @@
 package com.homeboundlabs.trace
 
-import android.Manifest
-import com.homeboundlabs.trace.quickadd.Voice
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.homeboundlabs.trace.ui.components.Tab
+import com.homeboundlabs.trace.ui.components.TabBar
+import com.homeboundlabs.trace.ui.theme.EmphasizedEasing
+import com.homeboundlabs.trace.ui.theme.Motion
+import com.homeboundlabs.trace.ui.theme.axisIn
+import com.homeboundlabs.trace.ui.theme.sheetIn
+import com.homeboundlabs.trace.ui.theme.sheetOut
+import com.homeboundlabs.trace.ui.theme.axisOut
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +60,6 @@ import com.homeboundlabs.trace.ui.theme.ThemeHost
 import com.homeboundlabs.trace.ui.theme.TraceColors
 import com.homeboundlabs.trace.ui.theme.isDarkFor
 import com.homeboundlabs.trace.ui.theme.TraceTheme
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val addRequests = mutableIntStateOf(0)
@@ -116,17 +119,46 @@ private fun TraceNav(addRequest: Int) {
         if (addRequest > 0 && app.prefs.onboarded) nav.navigate("add") { launchSingleTop = true }
     }
 
+    val route = nav.currentBackStackEntryAsState().value?.destination?.route
+    val tab = Tab.of(route)
+    // Tabs never stack: each sits right above Home, so Back from Insights or Settings lands on Home.
+    fun goTo(t: Tab) {
+        if (t == Tab.Home) nav.popBackStack("home", inclusive = false)
+        else nav.navigate(t.route) { popUpTo("home"); launchSingleTop = true }
+    }
+    fun isSheet(route: String?) = route == "add" || route?.startsWith("edit") == true
+    // Between tabs the screens move along a shared axis, by their order in the bar, under the fixed bar.
+    fun dir(from: String?, to: String?): Int? {
+        val a = Tab.of(from) ?: return null
+        val b = Tab.of(to) ?: return null
+        return if (b.ordinal > a.ordinal) 1 else -1
+    }
+
+    Box(Modifier.fillMaxSize()) {
     NavHost(
         nav, startDestination = if (startOnboarding) "onboarding" else "home",
         modifier = Modifier.fillMaxSize().background(TraceColors.Surface),
-        enterTransition = { slideInHorizontally(tween(280)) { it / 4 } + fadeIn(tween(200)) },
-        exitTransition = { fadeOut(tween(150)) },
-        popEnterTransition = { fadeIn(tween(200)) },
-        popExitTransition = { slideOutHorizontally(tween(240)) { it / 4 } + fadeOut(tween(180)) },
+        // One motion for every sideways move: between tabs by their order in the bar, and into a
+        // screen (forward) or back out of it. Add and edit rise over the screen like a sheet, which
+        // stays in place underneath.
+        enterTransition = {
+            axisIn(dir(initialState.destination.route, targetState.destination.route) ?: 1)
+        },
+        exitTransition = {
+            if (isSheet(targetState.destination.route)) ExitTransition.KeepUntilTransitionsFinished
+            else axisOut(dir(initialState.destination.route, targetState.destination.route) ?: 1)
+        },
+        popEnterTransition = {
+            if (isSheet(initialState.destination.route)) EnterTransition.None
+            else axisIn(dir(initialState.destination.route, targetState.destination.route) ?: -1)
+        },
+        popExitTransition = {
+            axisOut(dir(initialState.destination.route, targetState.destination.route) ?: -1)
+        },
     ) {
         composable(
             "onboarding",
-            exitTransition = { fadeOut(tween(350)) },
+            exitTransition = { fadeOut(tween(Motion.STANDARD)) },
         ) {
             OnboardingScreen(onDone = {
                 ready = true
@@ -135,38 +167,49 @@ private fun TraceNav(addRequest: Int) {
         }
         composable(
             "home",
-            enterTransition = { fadeIn(tween(450)) + slideInVertically(tween(450)) { it / 12 } },
+            enterTransition = {
+                dir(initialState.destination.route, targetState.destination.route)?.let { d -> axisIn(d) }
+                    ?: fadeIn(tween(Motion.STANDARD))
+            },
         ) {
             HomeScreen(
-                onAdd = { nav.navigate("add") { launchSingleTop = true } },
-                onSettings = { nav.navigate("settings") { launchSingleTop = true } },
+                onSettings = { goTo(Tab.Settings) },
                 onSeeAll = { nav.navigate("all") { launchSingleTop = true } },
                 onEdit = { id -> nav.navigate("edit/$id") { launchSingleTop = true } },
-                onInsights = { nav.navigate("insights") { launchSingleTop = true } },
             )
         }
         composable(
             "add",
-            enterTransition = { slideInVertically(tween(320)) { it / 3 } + fadeIn(tween(200)) },
-            popExitTransition = { slideOutVertically(tween(260)) { it / 3 } + fadeOut(tween(200)) },
+            enterTransition = { sheetIn() },
+            popExitTransition = { sheetOut() },
         ) { AddScreen(onClose = { nav.popBackStack() }) }
         composable("settings") {
             SettingsScreen(onBack = { nav.popBackStack() }, onCategories = { nav.navigate("categories") { launchSingleTop = true } })
         }
         composable("permissions") { PermissionsScreen(onDone = { nav.popBackStack() }) }
         composable("categories") { CategoriesScreen(onBack = { nav.popBackStack() }) }
-        composable("insights") { InsightsScreen(onBack = { nav.popBackStack() }) }
+        composable("insights") { InsightsScreen() }
         composable("all") {
             AllExpensesScreen(onBack = { nav.popBackStack() }, onEdit = { id -> nav.navigate("edit/$id") { launchSingleTop = true } })
         }
         composable(
             "edit/{id}",
             arguments = listOf(navArgument("id") { type = NavType.LongType }),
-            enterTransition = { slideInVertically(tween(320)) { it / 3 } + fadeIn(tween(200)) },
-            popExitTransition = { slideOutVertically(tween(260)) { it / 3 } + fadeOut(tween(200)) },
+            enterTransition = { sheetIn() },
+            popExitTransition = { sheetOut() },
         ) { entry ->
             AddScreen(onClose = { nav.popBackStack() }, editId = entry.arguments?.getLong("id"))
         }
+    }
+    // Fixed above the screens on the three tabs; it slides away for everything else.
+    AnimatedVisibility(
+        visible = tab != null,
+        modifier = Modifier.align(Alignment.BottomCenter),
+        enter = slideInVertically(tween(Motion.STANDARD, easing = EmphasizedEasing)) { it } + fadeIn(tween(Motion.QUICK)),
+        exit = slideOutVertically(tween(Motion.STANDARD, easing = EmphasizedEasing)) { it } + fadeOut(tween(Motion.QUICK)),
+    ) {
+        TabBar(current = tab ?: Tab.Home, onTab = ::goTo, onAdd = { nav.navigate("add") { launchSingleTop = true } })
+    }
     }
 }
 

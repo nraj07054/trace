@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -37,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
@@ -189,7 +189,7 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Lock-screen notification", style = ts(15, 700))
                     Text(
-                        "One small silent line on your lock screen. Tap it to add an expense without unlocking.",
+                        "One small silent line on your lock screen. Tap it to add an expense without unlocking. Clearing notifications keeps it; turn it off here.",
                         style = ts(13, 400, TraceColors.Muted),
                     )
                 }
@@ -217,7 +217,7 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
         }
 
         Section("About") { AboutSection() }
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.navigationBarsPadding().height(120.dp)) // room for the tab bar
     }
 }
 
