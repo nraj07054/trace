@@ -1,6 +1,5 @@
 package com.homeboundlabs.trace.ui.home
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -26,13 +25,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.homeboundlabs.trace.traceApp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -41,7 +38,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.homeboundlabs.trace.ui.theme.Motion
 import com.homeboundlabs.trace.data.Category
 import com.homeboundlabs.trace.data.Money
 import com.homeboundlabs.trace.ui.components.ExpenseRow
@@ -65,12 +62,18 @@ import com.homeboundlabs.trace.ui.settings.KOFI_URL
 import com.homeboundlabs.trace.ui.settings.openLink
 import com.homeboundlabs.trace.ui.components.tap
 import com.homeboundlabs.trace.ui.components.whenLabel
+import com.homeboundlabs.trace.ui.theme.SpringEasing
+import com.homeboundlabs.trace.ui.components.Wordmark
 import com.homeboundlabs.trace.ui.theme.TraceColors
 import com.homeboundlabs.trace.ui.theme.rememberReduceMotion
 import com.homeboundlabs.trace.ui.theme.ts
+import com.homeboundlabs.trace.ui.insights.BudgetSheet
+import kotlin.math.roundToInt
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun HomeScreen(onAdd: () -> Unit, onSettings: () -> Unit, onSeeAll: () -> Unit, onEdit: (Long) -> Unit, onInsights: () -> Unit, vm: HomeViewModel = viewModel()) {
+fun HomeScreen(onSettings: () -> Unit, onSeeAll: () -> Unit, onEdit: (Long) -> Unit, vm: HomeViewModel = viewModel()) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val reduceMotion = rememberReduceMotion()
     val context = LocalContext.current
@@ -80,6 +83,8 @@ fun HomeScreen(onAdd: () -> Unit, onSettings: () -> Unit, onSeeAll: () -> Unit, 
     }
 
     val scroll = rememberScrollState()
+    var budgetFor by rememberSaveable { mutableStateOf<String?>(null) }
+    val setBudget: (Category) -> Unit = { budgetFor = it.id }
 
     Box(Modifier.fillMaxSize().background(TraceColors.Surface)) {
         Column(
@@ -100,30 +105,34 @@ fun HomeScreen(onAdd: () -> Unit, onSettings: () -> Unit, onSeeAll: () -> Unit, 
                 Spacer(Modifier.height(244.dp))
             }
             PeriodPills(ui.period, vm::selectPeriod)
-            if (TraceColors.isDark) BudgetRings(ui, vm::selectFilter) else CategoryChips(ui, vm::selectFilter)
+            if (TraceColors.isDark) BudgetRings(ui, vm::selectFilter, setBudget) else CategoryChips(ui, vm::selectFilter, setBudget)
             Recent(ui, onSeeAll, onEdit, Modifier.padding(horizontal = 22.dp))
         }
         StatusBarFade(visible = scroll.value > 0, reduceMotion = reduceMotion)
-        BottomBar(
-            onAdd = onAdd,
-            onInsights = onInsights,
-            onSettings = onSettings,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
+    }
+
+    budgetFor?.let { id ->
+        val c = ui.categories.firstOrNull { it.id == id }
+        if (c == null) {
+            budgetFor = null
+        } else {
+            BudgetSheet(
+                category = c,
+                current = ui.budgets[id],
+                lastMonth = ui.lastMonthByCategory[id] ?: 0L,
+                previousMonthName = ui.previousMonthName,
+                currency = ui.currency,
+                onSave = { vm.setBudget(id, it); budgetFor = null },
+                onDismiss = { budgetFor = null },
+            )
+        }
     }
 }
 
 @Composable
 private fun Header(name: String, onAvatar: () -> Unit, modifier: Modifier) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            buildAnnotatedString {
-                append("Trace")
-                withStyle(SpanStyle(color = TraceColors.Accent)) { append(".") }
-            },
-            style = ts(22, 800, letterSpacing = -0.6f),
-            modifier = Modifier.semantics { heading() },
-        )
+        Wordmark(22, Modifier.semantics { heading() })
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             ThemeToggle()
             // Small, optional tip link. Opens Ko-fi in the browser (the app itself has no internet access).
@@ -193,8 +202,15 @@ private fun PeriodPills(current: Period, onPick: (Period) -> Unit) {
 }
 
 @Composable
-private fun CategoryChips(ui: HomeUi, onPick: (Category?) -> Unit) {
+private fun CategoryChips(ui: HomeUi, onPick: (Category?) -> Unit, onSetBudget: (Category) -> Unit) {
     val items: List<Category?> = listOf(null) + ui.categories
+    val month = ui.period == Period.Month
+    val reduceMotion = rememberReduceMotion()
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Text(
+        ui.categoriesTitle(), style = ts(16, 700),
+        modifier = Modifier.padding(start = 22.dp).semantics { heading() },
+    )
     LazyRow(
         contentPadding = PaddingValues(horizontal = 22.dp, vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -202,26 +218,53 @@ private fun CategoryChips(ui: HomeUi, onPick: (Category?) -> Unit) {
         itemsIndexed(items) { i, c ->
             val on = c == ui.filter
             val shape = RoundedCornerShape(18.dp)
-            Column(
-                Modifier.widthIn(min = 96.dp).clip(shape)
-                    .background(if (on) TraceColors.Ink else TraceColors.Surface)
-                    .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
-                    .tap(role = Role.Tab) { onPick(c) }
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+            val spent = ui.chipTotals.getOrElse(i) { 0L }
+            // On 1M a chip with a budget fills up like a tank; one without shows a "+". The label row
+            // has a fixed height, so every chip is the same size either way.
+            val budget = c?.let { ui.monthBudget(it) }
+            val pct = budget?.let { (spent * 100.0 / it).roundToInt() }
+            // Selected: a 2dp border in the category's own color and a small lift, the same as the
+            // dark cards, so the white chip and its fill stay visible.
+            val accent = c?.color ?: TraceColors.Ink
+            val lift by animateFloatAsState(if (on) 1.05f else 1f, if (reduceMotion) snap() else tween(Motion.STANDARD, easing = SpringEasing), label = "lift")
+            Box(
+                Modifier.graphicsLayer { scaleX = lift; scaleY = lift }
+                    .widthIn(min = 96.dp).clip(shape)
+                    .background(TraceColors.Surface)
+                    .border(if (on) 2.dp else 1.dp, if (on) accent else TraceColors.Border, shape)
+                    .tap(role = Role.Tab, label = listOfNotNull(c?.label ?: "All", pct?.let { "$it% of budget used" }).joinToString(", ")) { onPick(c) },
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    val dot = if (c == null) (if (on) TraceColors.OnInk else TraceColors.Ink) else c.color
-                    Box(Modifier.size(8.dp).clip(CircleShape).background(dot))
-                    Text(c?.label ?: "All", style = ts(12, 600, if (on) TraceColors.ChipSubOn else TraceColors.Muted))
+                // Selecting replays the wave.
+                if (pct != null) {
+                    WaveFill(pct, budgetColor(pct, c.color).copy(alpha = 0.16f), on, reduceMotion, Modifier.matchParentSize())
                 }
-                Text(
-                    Money.whole(ui.chipTotals.getOrElse(i) { 0L }, ui.currency),
-                    style = ts(15, 800, if (on) TraceColors.OnInk else TraceColors.Ink, letterSpacing = -0.3f),
-                )
+                Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(Modifier.height(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(Modifier.size(8.dp).clip(CircleShape).background(accent))
+                        Text(c?.label ?: "All", style = ts(12, if (on) 700 else 600, if (on) TraceColors.Ink else TraceColors.Muted))
+                        if (month && c != null && budget == null) {
+                            Spacer(Modifier.weight(1f))
+                            Box(
+                                Modifier.size(20.dp).clip(CircleShape).border(1.dp, TraceColors.Border, CircleShape)
+                                    .tap(label = "Set a ${c.label} budget", role = Role.Button) { onSetBudget(c) },
+                                contentAlignment = Alignment.Center,
+                            ) { TIcon(TraceIcons.Plus, TraceColors.Muted, 11.dp) }
+                        }
+                    }
+                    Text(
+                        buildAnnotatedString {
+                            append(Money.whole(spent, ui.currency))
+                            if (budget != null) withStyle(SpanStyle(color = TraceColors.Muted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)) {
+                                append(" / " + shortAmount(budget))
+                            }
+                        },
+                        style = ts(15, 800, TraceColors.Ink, letterSpacing = -0.3f),
+                    )
+                }
             }
         }
     }
+}
 }
 
 @Composable
@@ -254,79 +297,10 @@ private fun Recent(ui: HomeUi, onSeeAll: () -> Unit, onEdit: (Long) -> Unit, mod
     }
 }
 
-@Composable
-private fun BottomBar(onAdd: () -> Unit, onInsights: () -> Unit, onSettings: () -> Unit, modifier: Modifier) {
-    // An (empty) pointer handler makes the whole bar a touch target, so taps between the
-    // buttons stop here instead of falling through to the expense rows scrolled behind it.
-    Column(modifier.fillMaxWidth().pointerInput(Unit) {}) {
-        // Short fade so list rows dissolve above the bar instead of showing through it.
-        Spacer(
-            Modifier.fillMaxWidth().height(28.dp)
-                .background(Brush.verticalGradient(listOf(TraceColors.Surface.copy(alpha = 0f), TraceColors.Surface))),
-        )
-        if (TraceColors.isDark) DarkNav(onAdd, onInsights, onSettings)
-        else Row(
-            Modifier.fillMaxWidth().background(TraceColors.Surface).navigationBarsPadding().height(72.dp).padding(horizontal = 12.dp),
-            // Each item gets an equal share of the width, so there's no empty stretch before the + button.
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            NavIcon(TraceIcons.Home, "Home", TraceColors.Ink, 26) {}
-            NavIcon(TraceIcons.Insights, "Insights", TraceColors.NavInactive, 24, onInsights)
-            NavIcon(TraceIcons.Settings, "Settings", TraceColors.NavInactive, 24, onSettings)
-            Box(
-                Modifier.size(58.dp)
-                    .shadow(20.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.28f), spotColor = Color.Black.copy(alpha = 0.28f))
-                    .clip(CircleShape).background(TraceColors.Ink).tap(label = "Add expense", onClick = onAdd),
-                contentAlignment = Alignment.Center,
-            ) { TIcon(TraceIcons.Plus, TraceColors.OnInk, 24.dp, contentDescription = "Add expense") }
-        }
-    }
-}
-
-/** Dark bar from the "B" design: the three icons in a raised pill, Home lit, and an accent + button. */
-@Composable
-private fun DarkNav(onAdd: () -> Unit, onInsights: () -> Unit, onSettings: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().background(TraceColors.Surface).navigationBarsPadding()
-            .padding(start = 22.dp, end = 22.dp, top = 4.dp, bottom = 14.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(
-            Modifier.weight(1f).height(62.dp).clip(CircleShape).background(NavPill).padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(Modifier.size(46.dp).clip(CircleShape).background(NavLit), contentAlignment = Alignment.Center) {
-                TIcon(TraceIcons.Home, TraceColors.Ink, 24.dp, contentDescription = "Home")
-            }
-            NavIcon(TraceIcons.Insights, "Insights", NavDim, 23, onInsights)
-            NavIcon(TraceIcons.Settings, "Settings", NavDim, 23, onSettings)
-        }
-        Box(
-            Modifier.size(62.dp).clip(CircleShape).background(TraceColors.Accent).tap(label = "Add expense", onClick = onAdd),
-            contentAlignment = Alignment.Center,
-        ) { TIcon(TraceIcons.Plus, TraceColors.OnInk, 24.dp, contentDescription = "Add expense") }
-    }
-}
-
-private val NavPill = Color(0xFF1A1C21)
-private val NavLit = Color(0xFF2A2D35)
-private val NavDim = Color(0xFF8A909C)
-
-@Composable
-private fun NavIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, tint: Color, size: Int, onClick: () -> Unit) {
-    Box(
-        Modifier.size(44.dp).clip(CircleShape).tap(label = label, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) { TIcon(icon, tint, size.dp, contentDescription = label) }
-}
-
 /** Solid page color behind the clock/battery bar that spreads into a soft fade, shown once the page is scrolled. */
 @Composable
 private fun StatusBarFade(visible: Boolean, reduceMotion: Boolean) {
-    val alpha by animateFloatAsState(if (visible) 1f else 0f, if (reduceMotion) snap() else tween(200), label = "fade")
+    val alpha by animateFloatAsState(if (visible) 1f else 0f, if (reduceMotion) snap() else tween(Motion.QUICK), label = "fade")
     Column(Modifier.fillMaxWidth().graphicsLayer { this.alpha = alpha }) {
         Spacer(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(TraceColors.Surface))
         Spacer(

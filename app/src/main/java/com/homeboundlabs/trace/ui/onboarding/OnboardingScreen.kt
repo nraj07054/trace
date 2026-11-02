@@ -1,7 +1,5 @@
 package com.homeboundlabs.trace.ui.onboarding
 
-import android.Manifest
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -81,11 +79,11 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.layout
+import com.homeboundlabs.trace.ui.theme.Motion
 import com.homeboundlabs.trace.data.CURRENCIES
 import com.homeboundlabs.trace.data.Category
 import com.homeboundlabs.trace.data.Money
@@ -95,6 +93,7 @@ import com.homeboundlabs.trace.ui.components.TIcon
 import com.homeboundlabs.trace.ui.components.TraceIcons
 import com.homeboundlabs.trace.ui.components.tap
 import com.homeboundlabs.trace.ui.theme.SpringEasing
+import com.homeboundlabs.trace.ui.components.Wordmark
 import com.homeboundlabs.trace.ui.theme.TraceColors
 import com.homeboundlabs.trace.ui.theme.rememberReduceMotion
 import com.homeboundlabs.trace.ui.theme.ts
@@ -176,7 +175,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
     }
 
     // Background glow takes the color of the current page.
-    val glow by animateColorAsState(intros[pager.currentPage].glow, tween(600), label = "glow")
+    val glow by animateColorAsState(intros[pager.currentPage].glow, tween(Motion.SLOW), label = "glow")
 
     Box(Modifier.fillMaxSize().background(TraceColors.Surface)) {
         AmbientGlow(glow, reduceMotion)
@@ -224,13 +223,7 @@ private fun TopBar(pager: PagerState, onSkip: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(
-            buildAnnotatedString {
-                append("Trace")
-                withStyle(SpanStyle(color = TraceColors.Accent)) { append(".") }
-            },
-            style = ts(20, 800, letterSpacing = -0.6f),
-        )
+        Wordmark(20)
         val showSkip = pager.currentPage < PAGES - 1
         val skipAlpha by animateFloatAsState(if (showSkip) 1f else 0f, label = "skip")
         Box(
@@ -250,7 +243,7 @@ private fun BottomBar(pager: PagerState, onNext: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Dots(pager)
-        val width by animateDpAsState(if (last) 176.dp else 120.dp, tween(350, easing = SpringEasing), label = "btn")
+        val width by animateDpAsState(if (last) 176.dp else 120.dp, tween(Motion.STANDARD, easing = SpringEasing), label = "btn")
         Box(
             Modifier.width(width).height(56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
                 .tap(label = if (last) "Start tracing" else "Next", onClick = onNext),
@@ -259,7 +252,7 @@ private fun BottomBar(pager: PagerState, onNext: () -> Unit) {
             AnimatedContent(
                 targetState = last,
                 transitionSpec = {
-                    (fadeIn(tween(200)) + slideInVertically { it / 2 }) togetherWith (fadeOut(tween(120)) + slideOutVertically { -it / 2 })
+                    (fadeIn(tween(Motion.QUICK)) + slideInVertically { it / 2 }) togetherWith (fadeOut(tween(Motion.QUICK)) + slideOutVertically { -it / 2 })
                 },
                 label = "btnText",
             ) { isLast ->
@@ -416,7 +409,7 @@ private fun SetupPage(
                 CURRENCIES.forEach { c ->
                     val on = c == currency
                     val bg by animateColorAsState(if (on) TraceColors.Ink else TraceColors.Surface, label = "cur")
-                    val scale by animateFloatAsState(if (on) 1.06f else 1f, tween(300, easing = SpringEasing), label = "curScale")
+                    val scale by animateFloatAsState(if (on) 1.06f else 1f, tween(Motion.STANDARD, easing = SpringEasing), label = "curScale")
                     Box(
                         Modifier.scale(scale).size(width = 64.dp, height = 48.dp).clip(RoundedCornerShape(18.dp)).background(bg)
                             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, RoundedCornerShape(18.dp))
@@ -471,7 +464,7 @@ private fun BarsArt(active: Boolean, reduceMotion: Boolean) {
         anims.forEachIndexed { i, a ->
             launch {
                 if (!reduceMotion) delay(70L * i)
-                if (reduceMotion) a.snapTo(1f) else a.animateTo(1f, tween(650, easing = SpringEasing))
+                if (reduceMotion) a.snapTo(1f) else a.animateTo(1f, tween(Motion.SLOW, easing = SpringEasing))
             }
         }
         delay(if (reduceMotion) 0 else 750)
@@ -486,7 +479,7 @@ private fun BarsArt(active: Boolean, reduceMotion: Boolean) {
                     val grow = { maxH * h * anims[i].value.coerceAtLeast(0f) }
                     if (selected) {
                         val tipAlpha by animateFloatAsState(if (showTip) 1f else 0f, label = "tip")
-                        val tipScale by animateFloatAsState(if (showTip) 1f else 0.6f, tween(400, easing = SpringEasing), label = "tipS")
+                        val tipScale by animateFloatAsState(if (showTip) 1f else 0.6f, tween(Motion.STANDARD, easing = SpringEasing), label = "tipS")
                         Text(
                             Money.whole(375000L, "₹"),
                             style = ts(12, 700, TraceColors.OnInk), maxLines = 1,
@@ -528,7 +521,7 @@ private fun CategoriesArt(active: Boolean, reduceMotion: Boolean) {
         progress.forEachIndexed { i, a ->
             launch {
                 if (!reduceMotion) delay(110L * i)
-                if (reduceMotion) a.snapTo(1f) else a.animateTo(1f, tween(800, easing = SpringEasing))
+                if (reduceMotion) a.snapTo(1f) else a.animateTo(1f, tween(Motion.SLOW, easing = SpringEasing))
             }
         }
     }
@@ -602,7 +595,7 @@ private fun LockCardArt(active: Boolean, reduceMotion: Boolean, voice: Boolean) 
         }
         AnimatedContent(
             targetState = stage,
-            transitionSpec = { (fadeIn(tween(220)) + slideInVertically { -it / 4 }) togetherWith fadeOut(tween(150)) },
+            transitionSpec = { (fadeIn(tween(Motion.QUICK)) + slideInVertically { -it / 4 }) togetherWith fadeOut(tween(Motion.QUICK)) },
             modifier = Modifier.padding(10.dp).fillMaxWidth(),
             label = "lockCard",
         ) { st ->

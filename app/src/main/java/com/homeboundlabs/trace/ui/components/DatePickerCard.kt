@@ -1,11 +1,6 @@
 package com.homeboundlabs.trace.ui.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +32,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.homeboundlabs.trace.ui.theme.TraceColors
+import com.homeboundlabs.trace.ui.theme.axisIn
+import com.homeboundlabs.trace.ui.theme.axisOut
 import com.homeboundlabs.trace.ui.theme.ts
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -45,7 +42,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-/** Compact date picker in the app's style: quick picks plus a small month grid. Future days are disabled. */
+/** Compact date picker in the app's style: quick picks plus a small month grid. Future days are left blank. */
 @Composable
 fun DatePickerCard(selected: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit) {
     val today = LocalDate.now()
@@ -82,8 +79,7 @@ fun DatePickerCard(selected: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: 
                 targetState = month,
                 transitionSpec = {
                     val dir = if (targetState.isAfter(initialState)) 1 else -1
-                    (slideInHorizontally(tween(220)) { it / 5 * dir } + fadeIn(tween(220))) togetherWith
-                        (slideOutHorizontally(tween(180)) { -it / 5 * dir } + fadeOut(tween(150)))
+                    axisIn(dir) togetherWith axisOut(dir)
                 },
                 label = "month",
             ) { m -> MonthGrid(m, selected, today, onPick) }
@@ -156,15 +152,15 @@ private fun androidx.compose.foundation.layout.RowScope.DayCell(
     onPick: (LocalDate) -> Unit,
 ) {
     Box(Modifier.weight(1f).aspectRatio(1f).padding(2.dp), contentAlignment = Alignment.Center) {
-        if (date == null) return@Box
-        val future = date.isAfter(today)
+        // Days still to come aren't shown at all, so they can't look pickable (expenses are never in the future).
+        if (date == null || date.isAfter(today)) return@Box
         val isSel = date == selected
         val isToday = date == today
         Box(
             Modifier.size(36.dp).clip(CircleShape)
                 .background(if (isSel) TraceColors.Ink else Color.Transparent)
                 .then(if (isToday && !isSel) Modifier.border(1.dp, TraceColors.Ink, CircleShape) else Modifier)
-                .then(if (!future) Modifier.tap(label = date.toString()) { onPick(date) } else Modifier),
+                .tap(label = date.toString()) { onPick(date) },
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -173,7 +169,6 @@ private fun androidx.compose.foundation.layout.RowScope.DayCell(
                     13, if (isSel || isToday) 700 else 500,
                     when {
                         isSel -> TraceColors.OnInk
-                        future -> TraceColors.Border
                         else -> TraceColors.Ink
                     },
                 ),

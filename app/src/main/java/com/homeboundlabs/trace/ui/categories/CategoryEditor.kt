@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.homeboundlabs.trace.ui.theme.Motion
 import com.homeboundlabs.trace.data.Categories
 import com.homeboundlabs.trace.data.Category
 import com.homeboundlabs.trace.data.CategoryColors
@@ -153,7 +154,7 @@ fun CategoryEditor(
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     CategoryColors.forEach { c ->
                         val on = c == argb
-                        val scale by animateFloatAsState(if (on) 1.12f else 1f, tween(300, easing = SpringEasing), label = "sw")
+                        val scale by animateFloatAsState(if (on) 1.12f else 1f, tween(Motion.STANDARD, easing = SpringEasing), label = "sw")
                         Box(
                             Modifier.size(44.dp).scale(scale).clip(CircleShape)
                                 .border(if (on) 3.dp else 0.dp, if (on) TraceColors.Ink else Color.Transparent, CircleShape)

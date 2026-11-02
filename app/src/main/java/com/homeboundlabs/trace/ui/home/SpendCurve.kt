@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -43,6 +42,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.homeboundlabs.trace.ui.theme.Motion
 import com.homeboundlabs.trace.data.Category
 import com.homeboundlabs.trace.data.Money
 import com.homeboundlabs.trace.ui.components.tapNoRipple
@@ -76,9 +76,10 @@ fun SpendCurve(
     modifier: Modifier = Modifier,
 ) {
     val n = buckets.size
+    // The line stops at today; days and months still to come are left blank.
+    val live = max(1, buckets.count { !it.future })
     val totals = buckets.map { it.total(filter) }
     val maxTotal = max(1L, totals.maxOrNull() ?: 1L).toFloat()
-    val avg = if (totals.isEmpty()) 0f else totals.sum().toFloat() / totals.size
     val haptics = LocalHapticFeedback.current
 
     // Each point's height as a share of the tallest (0 = floor, 1 = top).
@@ -87,16 +88,14 @@ fun SpendCurve(
     LaunchedEffect(targets, heights) {
         heights.forEachIndexed { i, a ->
             launch {
-                if (reduceMotion) a.snapTo(targets[i]) else a.animateTo(targets[i], tween(650, easing = SpringEasing))
+                if (reduceMotion) a.snapTo(targets[i]) else a.animateTo(targets[i], tween(Motion.SLOW, easing = SpringEasing))
             }
         }
     }
-    val sel = selected.coerceIn(0, max(0, n - 1))
-    val marker by animateFloatAsState(sel.toFloat(), if (reduceMotion) snap() else tween(420, easing = CssEase), label = "marker")
-    val avgShare by animateFloatAsState(avg / maxTotal, if (reduceMotion) snap() else tween(500, easing = CssEase), label = "avg")
-    val line by animateColorAsState(filter?.color ?: TraceColors.Accent, tween(300), label = "line")
+    val sel = selected.coerceIn(0, live - 1)
+    val marker by animateFloatAsState(sel.toFloat(), if (reduceMotion) snap() else tween(Motion.STANDARD, easing = CssEase), label = "marker")
+    val line by animateColorAsState(filter?.color ?: TraceColors.Accent, tween(Motion.STANDARD), label = "line")
 
-    val dash = TraceColors.Dash
     val guide = TraceColors.Ghost
     val surface = TraceColors.Surface
 
@@ -106,13 +105,7 @@ fun SpendCurve(
                 if (n == 0) return@Canvas
                 val top = TOP.dp.toPx()
                 val span = size.height - top - BOTTOM.dp.toPx()
-                val pts = curvePoints(heights.map { it.value }, size.width, top, span)
-
-                val avgY = top + span * (1f - avgShare)
-                drawLine(
-                    dash, Offset(0f, avgY), Offset(size.width, avgY), strokeWidth = 1.5.dp.toPx(),
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 5.dp.toPx())),
-                )
+                val pts = curvePoints(heights.map { it.value }, size.width, top, span).take(live)
 
                 val curve = smoothPath(pts)
                 val area = smoothPath(pts).apply {
@@ -133,20 +126,6 @@ fun SpendCurve(
                 drawCircle(line, radius = 7.dp.toPx(), center = m, style = Stroke(width = 3.5.dp.toPx()))
             }
 
-            AvgTag(
-                "avg " + Money.whole(avg.toDouble(), currency), visible = avg > 0f, reduceMotion = reduceMotion,
-                modifier = Modifier.fillMaxSize().layout { measurable, constraints ->
-                    val p = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
-                    layout(constraints.maxWidth, constraints.maxHeight) {
-                        val top = TOP.dp.toPx()
-                        val span = constraints.maxHeight - top - BOTTOM.dp.toPx()
-                        val y = top + span * (1f - avgShare) - p.height - 4.dp.toPx()
-                        // Left edge: the amount bubble usually sits on the right (the latest day).
-                        p.place(0, y.roundToInt())
-                    }
-                },
-            )
-
             if (n > 0) {
                 // Amount bubble above the marker, kept inside the chart's edges.
                 Text(
@@ -159,7 +138,7 @@ fun SpendCurve(
                             layout(constraints.maxWidth, constraints.maxHeight) {
                                 val top = TOP.dp.toPx()
                                 val span = constraints.maxHeight - top - BOTTOM.dp.toPx()
-                                val m = pointOnCurve(curvePoints(heights.map { it.value }, constraints.maxWidth.toFloat(), top, span), marker)
+                                val m = pointOnCurve(curvePoints(heights.map { it.value }, constraints.maxWidth.toFloat(), top, span).take(live), marker)
                                 val x = (m.x - p.width / 2f).coerceIn(0f, (constraints.maxWidth - p.width).toFloat())
                                 val y = (m.y - p.height - 18.dp.toPx()).coerceAtLeast(0f)
                                 p.place(x.roundToInt(), y.roundToInt())
@@ -176,6 +155,10 @@ fun SpendCurve(
                 buckets.forEachIndexed { i, b ->
                     val on = i == sel
                     val amount = Money.whole(totals[i], currency)
+                    if (b.future) {
+                        Box(Modifier.weight(1f).fillMaxHeight())
+                        return@forEachIndexed
+                    }
                     Box(
                         Modifier.weight(1f).fillMaxHeight()
                             .clearAndSetSemantics {
@@ -198,7 +181,7 @@ fun SpendCurve(
                 Text(
                     b.label,
                     modifier = Modifier.weight(1f),
-                    style = ts(11, if (on) 800 else 500, if (on) TraceColors.Ink else TraceColors.Faint),
+                    style = ts(11, if (on) 800 else 500, if (on) TraceColors.Ink else if (b.future) TraceColors.Ghost else TraceColors.Faint),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                 )
@@ -219,8 +202,12 @@ private fun controls(p: List<Offset>, i: Int): Pair<Offset, Offset> {
     val p1 = p[i]
     val p2 = p[i + 1]
     val p3 = p[minOf(p.lastIndex, i + 2)]
-    return Offset(p1.x + (p2.x - p0.x) / 6, p1.y + (p2.y - p0.y) / 6) to
-        Offset(p2.x - (p3.x - p1.x) / 6, p2.y - (p3.y - p1.y) / 6)
+    // Keep each segment between its two points' heights, so the line never sags below the floor
+    // (or bulges over a peak) on its way from a flat stretch to a rise.
+    val lo = minOf(p1.y, p2.y)
+    val hi = maxOf(p1.y, p2.y)
+    return Offset(p1.x + (p2.x - p0.x) / 6, (p1.y + (p2.y - p0.y) / 6).coerceIn(lo, hi)) to
+        Offset(p2.x - (p3.x - p1.x) / 6, (p2.y - (p3.y - p1.y) / 6).coerceIn(lo, hi))
 }
 
 private fun smoothPath(p: List<Offset>): Path = Path().apply {

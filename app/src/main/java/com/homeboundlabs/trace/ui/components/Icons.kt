@@ -3,7 +3,6 @@ package com.homeboundlabs.trace.ui.components
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -38,6 +37,10 @@ object TraceIcons {
     val Code = stroke("M9 7l-5 5 5 5M15 7l5 5-5 5", 2.2f)
     val Bell = stroke("M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0", 2f)
     val Sun = stroke("M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4l1.4-1.4M18 6l1.4-1.4", 2f)
+    val Wallet = stroke("M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5zM16 13.5h.01", 2f)
+    val Bulb = stroke("M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z", 2f)
+    val Alert = stroke("M12 4L2.8 19.5a1 1 0 0 0 .9 1.5h16.6a1 1 0 0 0 .9-1.5zM12 10v4M12 17.5h.01", 2f)
+    val CheckCircle = stroke("M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M8.5 12.2l2.4 2.4 4.6-4.8", 2f)
     val Moon = stroke("M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9z", 2f)
 
     private val iconCache = HashMap<String, ImageVector>()

@@ -71,6 +71,16 @@ class Prefs(context: Context) {
         if (i <= 0) null else part.substring(i + 1).toLongOrNull()?.let { part.substring(0, i) to it }
     }.toMap()
 
+    private val _dismissedTips = MutableStateFlow(sp.getStringSet(KEY_DISMISSED_TIPS, emptySet())!!.toSet())
+    /** Insights tips hidden with "Not now", as "2026-11:tip-id" so each only stays hidden for its month. */
+    val dismissedTips: StateFlow<Set<String>> = _dismissedTips.asStateFlow()
+
+    fun dismissTip(key: String) {
+        val next = _dismissedTips.value + key
+        sp.edit().putStringSet(KEY_DISMISSED_TIPS, next).apply()
+        _dismissedTips.value = next
+    }
+
     var onboarded: Boolean
         get() = sp.getBoolean(KEY_ONBOARDED, false)
         set(value) = sp.edit().putBoolean(KEY_ONBOARDED, value).apply()
@@ -95,6 +105,7 @@ class Prefs(context: Context) {
         const val KEY_BUDGETS = "budgets"
         const val KEY_LOCK_VERIFIED = "lock_verified"
         const val KEY_THEME = "theme"
+        const val KEY_DISMISSED_TIPS = "dismissed_tips"
     }
 }
 

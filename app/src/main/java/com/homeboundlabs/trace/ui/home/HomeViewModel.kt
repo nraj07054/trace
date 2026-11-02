@@ -7,11 +7,13 @@ import com.homeboundlabs.trace.data.Categories
 import com.homeboundlabs.trace.data.Category
 import com.homeboundlabs.trace.data.Expense
 import com.homeboundlabs.trace.traceApp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
@@ -25,8 +27,8 @@ enum class Period(val id: String, val label: String) {
     Week("1W", "this week"), Month("1M", "this month"), HalfYear("6M", "in 6 months"), Year("1Y", "this year")
 }
 
-/** One chart bar. [byCat] maps category id → amount, in minor units. */
-data class Bucket(val label: String, val byCat: MutableMap<String, Long> = HashMap()) {
+/** One chart bar. [byCat] maps category id → amount, in minor units. [future] is a day or month still to come. */
+data class Bucket(val label: String, val future: Boolean = false, val byCat: MutableMap<String, Long> = HashMap()) {
     fun total(filter: Category?) = if (filter == null) byCat.values.sum() else byCat[filter.id] ?: 0L
     fun of(c: Category) = byCat[c.id] ?: 0L
 }
@@ -45,10 +47,14 @@ data class HomeUi(
     val name: String = "",
     /** Monthly limits: category id → minor units. */
     val budgets: Map<String, Long> = emptyMap(),
+    /** Last calendar month's spend per category id, the hint when setting a budget. */
+    val lastMonthByCategory: Map<String, Long> = emptyMap(),
+    val previousMonthName: String = "",
     val loaded: Boolean = false,
 )
 
-private data class Selection(val period: Period = Period.Week, val filter: Category? = null, val selected: Int = 6)
+/** [selected] null means the current day, week or month of the period. */
+private data class Selection(val period: Period = Period.Week, val filter: Category? = null, val selected: Int? = null)
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val prefs = app.traceApp.prefs
@@ -64,42 +70,46 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         combine(repo.observeSince(since), selection, profile, Categories.all) { list, sel, (cur, name, budgets), cats ->
             compute(n, list, sel, cur, name, cats).copy(budgets = budgets)
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
+    }.flowOn(Dispatchers.Default) // worked out off the main thread, so screens never wait on it
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUi())
 
     fun refreshClock() { now.value = ZonedDateTime.now() }
 
-    fun selectPeriod(p: Period) = selection.update { it.copy(period = p, selected = bucketCount(p) - 1) }
+    fun selectPeriod(p: Period) = selection.update { it.copy(period = p, selected = null) }
     fun selectBar(i: Int) = selection.update { it.copy(selected = i) }
     fun selectFilter(c: Category?) = selection.update { it.copy(filter = c) }
-
-    private fun bucketCount(p: Period) = when (p) { Period.Week -> 7; Period.Month -> 4; Period.HalfYear -> 6; Period.Year -> 12 }
+    fun setBudget(categoryId: String, limitMinor: Long?) = prefs.setBudget(categoryId, limitMinor)
 
     private fun compute(now: ZonedDateTime, all: List<Expense>, sel: Selection, cur: String, name: String, cats: List<Category>): HomeUi {
         val zone = now.zone
         val today = now.toLocalDate()
         fun ms(d: LocalDate) = d.atStartOfDay(zone).toInstant().toEpochMilli()
 
-        // Bucket boundaries (start-inclusive, end-exclusive), oldest first.
+        // Bucket boundaries (start-inclusive, end-exclusive), oldest first. Week, month and year
+        // are calendar periods (Mon–Sun, this month's weeks, Jan–Dec), so they reset when a new one starts.
+        val weekStart = today.minusDays((today.dayOfWeek.value - 1).toLong())
+        val monthStart = today.withDayOfMonth(1)
         val ranges: List<Triple<String, LocalDate, LocalDate>> = when (sel.period) {
-            Period.Week -> (6 downTo 0).map {
-                val d = today.minusDays(it.toLong())
+            Period.Week -> (0..6).map {
+                val d = weekStart.plusDays(it.toLong())
                 Triple(d.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US), d, d.plusDays(1))
             }
-            Period.Month -> (0..3).map { j ->
-                val start = today.minusDays(27L - 7 * j)
-                Triple("W${j + 1}", start, start.plusDays(7))
+            Period.Month -> (0 until (monthStart.lengthOfMonth() + 6) / 7).map { j ->
+                val start = monthStart.plusDays(7L * j)
+                Triple("W${j + 1}", start, minOf(start.plusDays(7), monthStart.plusMonths(1)))
             }
             Period.HalfYear -> (5 downTo 0).map {
                 val m = today.withDayOfMonth(1).minusMonths(it.toLong())
                 Triple(m.format(DateTimeFormatter.ofPattern("MMM", Locale.US)), m, m.plusMonths(1))
             }
-            Period.Year -> (11 downTo 0).map {
-                val m = today.withDayOfMonth(1).minusMonths(it.toLong())
+            Period.Year -> (0..11).map {
+                val m = today.withDayOfYear(1).plusMonths(it.toLong())
                 Triple(m.format(DateTimeFormatter.ofPattern("MMMMM", Locale.US)), m, m.plusMonths(1))
             }
         }
         val bounds = ranges.map { ms(it.second) to ms(it.third) }
-        val buckets = ranges.map { Bucket(it.first) }
+        val buckets = ranges.map { Bucket(it.first, future = it.second > today) }
+        val current = ranges.indexOfLast { it.second <= today }
         val periodStart = bounds.first().first
         val periodEnd = bounds.last().second
         for (e in all) {
@@ -116,14 +126,22 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         // Delta: same span shifted back one period, cut at the same point in time.
         val nowMs = now.toInstant().toEpochMilli()
         val (prevStart, prevEnd) = when (sel.period) {
-            Period.Week -> ms(ranges.first().second.minusDays(7)) to now.minusDays(7).toInstant().toEpochMilli()
-            Period.Month -> ms(ranges.first().second.minusDays(28)) to now.minusDays(28).toInstant().toEpochMilli()
+            Period.Week -> ms(weekStart.minusDays(7)) to now.minusDays(7).toInstant().toEpochMilli()
+            Period.Month -> ms(monthStart.minusMonths(1)) to now.minusMonths(1).toInstant().toEpochMilli()
             Period.HalfYear -> ms(ranges.first().second.minusMonths(6)) to now.minusMonths(6).toInstant().toEpochMilli()
             Period.Year -> ms(ranges.first().second.minusYears(1)) to now.minusYears(1).toInstant().toEpochMilli()
         }
         val prev = all.filter { it.createdAt in prevStart until prevEnd && matches(it) }.sumOf { it.amountMinor }
-        val current = all.filter { it.createdAt in periodStart..nowMs && matches(it) }.sumOf { it.amountMinor }
-        val delta = if (prev > 0) ((current - prev) * 100.0 / prev).roundToInt() else null
+        val sofar = all.filter { it.createdAt in periodStart..nowMs && matches(it) }.sumOf { it.amountMinor }
+        // Only compare with a period that was fully tracked: before the first expense there's
+        // nothing to compare, and a part-tracked period gives silly jumps ("↗ 5923%").
+        val trackedFrom = all.minOfOrNull { it.createdAt }
+        val delta = if (prev > 0 && trackedFrom != null && trackedFrom <= prevStart) ((sofar - prev) * 100.0 / prev).roundToInt() else null
+
+        val lastStart = ms(monthStart.minusMonths(1))
+        val lastEnd = ms(monthStart)
+        val lastMonth = HashMap<String, Long>()
+        for (e in all) if (e.createdAt in lastStart until lastEnd) lastMonth.merge(e.categoryId, e.amountMinor, Long::plus)
 
         val chips = listOf(buckets.sumOf { it.total(null) }) +
             cats.map { c -> buckets.sumOf { it.of(c) } }
@@ -131,7 +149,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         return HomeUi(
             period = sel.period,
             filter = filter,
-            selected = sel.selected.coerceIn(0, buckets.size - 1),
+            selected = (sel.selected ?: current).coerceIn(0, buckets.size - 1),
             buckets = buckets,
             periodTotal = periodTotal,
             deltaPct = delta,
@@ -140,6 +158,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             recent = all.asSequence().filter { it.createdAt <= nowMs + 60_000 && matches(it) }.take(4).toList(),
             currency = cur,
             name = name,
+            lastMonthByCategory = lastMonth,
+            previousMonthName = monthStart.minusMonths(1).month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
             loaded = true,
         )
     }
