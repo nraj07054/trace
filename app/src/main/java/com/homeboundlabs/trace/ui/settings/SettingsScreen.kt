@@ -11,15 +11,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -103,8 +107,8 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 decorationBox = { inner ->
                     Box(
-                        Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
-                            .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp),
+                        Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
+                            .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp, vertical = 10.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
                         if (name.isEmpty()) Text("Shown as your avatar initial", style = ts(16, 600, TraceColors.Ghost))
@@ -120,7 +124,7 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                     val on = c == currency
                     val shape = RoundedCornerShape(18.dp)
                     Box(
-                        Modifier.size(width = 64.dp, height = 48.dp).clip(shape)
+                        Modifier.widthIn(min = 64.dp).heightIn(min = 48.dp).clip(shape)
                             .background(if (on) TraceColors.Ink else TraceColors.Surface)
                             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
                             .tap(role = Role.RadioButton, label = c) {
@@ -135,7 +139,8 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
 
         Section("Appearance") {
             val mode by app.prefs.themeMode.collectAsStateWithLifecycle()
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Intrinsic height keeps the three buttons level when one label wraps at a big font size.
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(
                     Triple(ThemeMode.Light, "Light", TraceIcons.Sun),
                     Triple(ThemeMode.Dark, "Dark", TraceIcons.Moon),
@@ -146,18 +151,19 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
                     val fg = if (on) TraceColors.OnInk else TraceColors.Ink
                     val center = remember { arrayOf(Offset.Unspecified) }
                     Column(
-                        Modifier.weight(1f).height(64.dp).themeOrigin { center[0] = it }.clip(shape)
+                        Modifier.weight(1f).fillMaxHeight().heightIn(min = 64.dp).themeOrigin { center[0] = it }.clip(shape)
                             .background(if (on) TraceColors.Ink else TraceColors.Surface)
                             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
                             .tap(role = Role.RadioButton, label = label) {
                                 ThemeOrigin.set(center[0])
                                 app.prefs.setThemeMode(m)
-                            },
+                            }
+                            .padding(horizontal = 6.dp, vertical = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
                     ) {
                         TIcon(icon, fg, 18.dp)
-                        Text(label, style = ts(13, 700, fg), maxLines = 1)
+                        Text(label, style = ts(13, 700, fg), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     }
                 }
             }

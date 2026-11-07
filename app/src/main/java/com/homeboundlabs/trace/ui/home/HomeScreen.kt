@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
+import com.homeboundlabs.trace.ui.theme.CapTextScale
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -96,11 +99,13 @@ fun HomeScreen(onSettings: () -> Unit, onSeeAll: () -> Unit, onEdit: (Long) -> U
             Header(ui.name, onSettings, Modifier.padding(horizontal = 22.dp))
             Total(ui, Modifier.padding(horizontal = 22.dp))
             if (ui.loaded) {
-                SpendChart(
-                    buckets = ui.buckets, categories = ui.categories, selected = ui.selected, filter = ui.filter, currency = ui.currency,
-                    reduceMotion = reduceMotion, onSelect = vm::selectBar,
-                    modifier = Modifier.padding(horizontal = 22.dp),
-                )
+                CapTextScale {
+                    SpendChart(
+                        buckets = ui.buckets, categories = ui.categories, selected = ui.selected, filter = ui.filter, currency = ui.currency,
+                        reduceMotion = reduceMotion, onSelect = vm::selectBar,
+                        modifier = Modifier.padding(horizontal = 22.dp),
+                    )
+                }
             } else {
                 Spacer(Modifier.height(244.dp))
             }
@@ -146,7 +151,7 @@ private fun Header(name: String, onAvatar: () -> Unit, modifier: Modifier) {
                 Modifier.size(36.dp).clip(CircleShape).background(TraceColors.Fill).tap(label = "Settings", onClick = onAvatar),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(name.trim().firstOrNull()?.uppercase() ?: "N", style = ts(13, 700, TraceColors.AvatarText))
+                CapTextScale { Text(name.trim().firstOrNull()?.uppercase() ?: "N", style = ts(13, 700, TraceColors.AvatarText)) }
             }
         }
     }
@@ -179,6 +184,8 @@ private fun Total(ui: HomeUi, modifier: Modifier) {
             },
             style = ts(50, 800, letterSpacing = -2f, tight = true),
             maxLines = 1,
+            // Large amounts or a big font size shrink to fit instead of running off the screen.
+            autoSize = TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = 50.sp),
         )
     }
 }
@@ -189,10 +196,10 @@ private fun PeriodPills(current: Period, onPick: (Period) -> Unit) {
         Period.entries.forEach { p ->
             val on = p == current
             Box(
-                Modifier.widthIn(min = 52.dp).height(36.dp).clip(RoundedCornerShape(18.dp))
+                Modifier.widthIn(min = 52.dp).heightIn(min = 36.dp).clip(RoundedCornerShape(18.dp))
                     .background(if (on) TraceColors.Fill else Color.Transparent)
                     .tap(role = Role.Tab, label = p.label) { onPick(p) }
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(p.id, style = ts(13, if (on) 800 else 600, if (on) TraceColors.Ink else TraceColors.Faint))
@@ -211,55 +218,57 @@ private fun CategoryChips(ui: HomeUi, onPick: (Category?) -> Unit, onSetBudget: 
         ui.categoriesTitle(), style = ts(16, 700),
         modifier = Modifier.padding(start = 22.dp).semantics { heading() },
     )
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        itemsIndexed(items) { i, c ->
-            val on = c == ui.filter
-            val shape = RoundedCornerShape(18.dp)
-            val spent = ui.chipTotals.getOrElse(i) { 0L }
-            // On 1M a chip with a budget fills up like a tank; one without shows a "+". The label row
-            // has a fixed height, so every chip is the same size either way.
-            val budget = c?.let { ui.monthBudget(it) }
-            val pct = budget?.let { (spent * 100.0 / it).roundToInt() }
-            // Selected: a 2dp border in the category's own color and a small lift, the same as the
-            // dark cards, so the white chip and its fill stay visible.
-            val accent = c?.color ?: TraceColors.Ink
-            val lift by animateFloatAsState(if (on) 1.05f else 1f, if (reduceMotion) snap() else tween(Motion.STANDARD, easing = SpringEasing), label = "lift")
-            Box(
-                Modifier.graphicsLayer { scaleX = lift; scaleY = lift }
-                    .widthIn(min = 96.dp).clip(shape)
-                    .background(TraceColors.Surface)
-                    .border(if (on) 2.dp else 1.dp, if (on) accent else TraceColors.Border, shape)
-                    .tap(role = Role.Tab, label = listOfNotNull(c?.label ?: "All", pct?.let { "$it% of budget used" }).joinToString(", ")) { onPick(c) },
-            ) {
-                // Selecting replays the wave.
-                if (pct != null) {
-                    WaveFill(pct, budgetColor(pct, c.color).copy(alpha = 0.16f), on, reduceMotion, Modifier.matchParentSize())
-                }
-                Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(Modifier.height(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Box(Modifier.size(8.dp).clip(CircleShape).background(accent))
-                        Text(c?.label ?: "All", style = ts(12, if (on) 700 else 600, if (on) TraceColors.Ink else TraceColors.Muted))
-                        if (month && c != null && budget == null) {
-                            Spacer(Modifier.weight(1f))
-                            Box(
-                                Modifier.size(20.dp).clip(CircleShape).border(1.dp, TraceColors.Border, CircleShape)
-                                    .tap(label = "Set a ${c.label} budget", role = Role.Button) { onSetBudget(c) },
-                                contentAlignment = Alignment.Center,
-                            ) { TIcon(TraceIcons.Plus, TraceColors.Muted, 11.dp) }
-                        }
+    CapTextScale {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 22.dp, vertical = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            itemsIndexed(items) { i, c ->
+                val on = c == ui.filter
+                val shape = RoundedCornerShape(18.dp)
+                val spent = ui.chipTotals.getOrElse(i) { 0L }
+                // On 1M a chip with a budget fills up like a tank; one without shows a "+". The label row
+                // has a fixed height, so every chip is the same size either way.
+                val budget = c?.let { ui.monthBudget(it) }
+                val pct = budget?.let { (spent * 100.0 / it).roundToInt() }
+                // Selected: a 2dp border in the category's own color and a small lift, the same as the
+                // dark cards, so the white chip and its fill stay visible.
+                val accent = c?.color ?: TraceColors.Ink
+                val lift by animateFloatAsState(if (on) 1.05f else 1f, if (reduceMotion) snap() else tween(Motion.STANDARD, easing = SpringEasing), label = "lift")
+                Box(
+                    Modifier.graphicsLayer { scaleX = lift; scaleY = lift }
+                        .widthIn(min = 96.dp).clip(shape)
+                        .background(TraceColors.Surface)
+                        .border(if (on) 2.dp else 1.dp, if (on) accent else TraceColors.Border, shape)
+                        .tap(role = Role.Tab, label = listOfNotNull(c?.label ?: "All", pct?.let { "$it% of budget used" }).joinToString(", ")) { onPick(c) },
+                ) {
+                    // Selecting replays the wave.
+                    if (pct != null) {
+                        WaveFill(pct, budgetColor(pct, c.color).copy(alpha = 0.16f), on, reduceMotion, Modifier.matchParentSize())
                     }
-                    Text(
-                        buildAnnotatedString {
-                            append(Money.whole(spent, ui.currency))
-                            if (budget != null) withStyle(SpanStyle(color = TraceColors.Muted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)) {
-                                append(" / " + shortAmount(budget))
+                    Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(Modifier.heightIn(min = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Box(Modifier.size(8.dp).clip(CircleShape).background(accent))
+                            Text(c?.label ?: "All", style = ts(12, if (on) 700 else 600, if (on) TraceColors.Ink else TraceColors.Muted))
+                            if (month && c != null && budget == null) {
+                                Spacer(Modifier.weight(1f))
+                                Box(
+                                    Modifier.size(20.dp).clip(CircleShape).border(1.dp, TraceColors.Border, CircleShape)
+                                        .tap(label = "Set a ${c.label} budget", role = Role.Button) { onSetBudget(c) },
+                                    contentAlignment = Alignment.Center,
+                                ) { TIcon(TraceIcons.Plus, TraceColors.Muted, 11.dp) }
                             }
-                        },
-                        style = ts(15, 800, TraceColors.Ink, letterSpacing = -0.3f),
-                    )
+                        }
+                        Text(
+                            buildAnnotatedString {
+                                append(Money.whole(spent, ui.currency))
+                                if (budget != null) withStyle(SpanStyle(color = TraceColors.Muted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)) {
+                                    append(" / " + shortAmount(budget))
+                                }
+                            },
+                            style = ts(15, 800, TraceColors.Ink, letterSpacing = -0.3f),
+                        )
+                    }
                 }
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -91,9 +92,9 @@ fun DatePickerCard(selected: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: 
 private fun QuickPick(label: String, on: Boolean, onClick: () -> Unit) {
     val shape = RoundedCornerShape(18.dp)
     Box(
-        Modifier.height(36.dp).clip(shape).background(if (on) TraceColors.Ink else TraceColors.Sheet)
+        Modifier.heightIn(min = 36.dp).clip(shape).background(if (on) TraceColors.Ink else TraceColors.Sheet)
             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, shape)
-            .tap(role = Role.Button, label = label, onClick = onClick).padding(horizontal = 14.dp),
+            .tap(role = Role.Button, label = label, onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) { Text(label, style = ts(13, 600, if (on) TraceColors.OnInk else TraceColors.Ink)) }
 }

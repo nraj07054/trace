@@ -44,6 +44,8 @@ import com.homeboundlabs.trace.ui.theme.SpringEasing
 import com.homeboundlabs.trace.ui.theme.TraceColors
 import com.homeboundlabs.trace.ui.theme.rememberReduceMotion
 import com.homeboundlabs.trace.ui.theme.ts
+import com.homeboundlabs.trace.ui.theme.CapTextScale
+import com.homeboundlabs.trace.ui.theme.scaledWithText
 import kotlin.math.roundToInt
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
@@ -105,32 +107,34 @@ fun BudgetRings(ui: HomeUi, onPick: (Category?) -> Unit, onSetBudget: (Category)
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,
         ) {
-            Text(ui.categoriesTitle(), style = ts(16, 700), modifier = Modifier.semantics { heading() })
+            Text(ui.categoriesTitle(), style = ts(16, 700), modifier = Modifier.weight(1f, fill = false).semantics { heading() })
             Text("Tap to filter", style = ts(12, 500, TraceColors.Muted))
         }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 22.dp, vertical = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            item(key = "all") {
-                CategoryCard(
-                    label = "All", color = TraceColors.Ink, icon = TraceIcons.Wallet, amount = Money.whole(all, ui.currency),
-                    on = ui.filter == null, pct = null, footer = Footer.None, onFooter = {},
-                ) { onPick(null) }
-            }
-            itemsIndexed(ui.categories, key = { _, c -> c.id }) { i, c ->
-                val spent = ui.chipTotals.getOrElse(i + 1) { 0L }
-                val budget = ui.monthBudget(c)
-                val footer = when {
-                    budget != null -> Footer.Of(shortAmount(budget))
-                    month -> Footer.AddBudget
-                    else -> Footer.None
+        CapTextScale {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 22.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item(key = "all") {
+                    CategoryCard(
+                        label = "All", color = TraceColors.Ink, icon = TraceIcons.Wallet, amount = Money.whole(all, ui.currency),
+                        on = ui.filter == null, pct = null, footer = Footer.None, onFooter = {},
+                    ) { onPick(null) }
                 }
-                CategoryCard(
-                    label = c.label, color = c.color, icon = TraceIcons.category(c), amount = Money.whole(spent, ui.currency),
-                    on = c == ui.filter, pct = budget?.let { (spent * 100.0 / it).roundToInt() },
-                    footer = footer, onFooter = { onSetBudget(c) },
-                ) { onPick(if (c == ui.filter) null else c) }
+                itemsIndexed(ui.categories, key = { _, c -> c.id }) { i, c ->
+                    val spent = ui.chipTotals.getOrElse(i + 1) { 0L }
+                    val budget = ui.monthBudget(c)
+                    val footer = when {
+                        budget != null -> Footer.Of(shortAmount(budget))
+                        month -> Footer.AddBudget
+                        else -> Footer.None
+                    }
+                    CategoryCard(
+                        label = c.label, color = c.color, icon = TraceIcons.category(c), amount = Money.whole(spent, ui.currency),
+                        on = c == ui.filter, pct = budget?.let { (spent * 100.0 / it).roundToInt() },
+                        footer = footer, onFooter = { onSetBudget(c) },
+                    ) { onPick(if (c == ui.filter) null else c) }
+                }
             }
         }
     }
@@ -176,7 +180,7 @@ private fun CategoryCard(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Box(Modifier.size(58.dp).graphicsLayer { scaleX = scale; scaleY = scale }, contentAlignment = Alignment.Center) {
+        Box(Modifier.size(scaledWithText(58.dp)).graphicsLayer { scaleX = scale; scaleY = scale }, contentAlignment = Alignment.Center) {
             Canvas(Modifier.fillMaxSize()) {
                 if (pct != null) {
                     val w = 7.dp.toPx()
@@ -196,7 +200,7 @@ private fun CategoryCard(
                 }
             }
             if (pct != null) Text("$pct%", style = ts(12, 800, if (pct > 100) ringColor else TraceColors.Ink))
-            else TIcon(icon, color, 20.dp)
+            else TIcon(icon, color, scaledWithText(20.dp))
             if (footer == Footer.AddBudget) {
                 // A small "+" badge on the circle; its own tap sets a budget instead of filtering.
                 Box(
@@ -214,14 +218,14 @@ private fun CategoryCard(
             }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 2.dp)) {
-            Text(label, style = ts(12, 600, Label), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 6.dp))
+            Text(label, style = ts(12, 600, Label), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 10.dp))
             // A budget rides on the amount line ("₹611 / 5k"), so budget cards stay as short as the rest.
             Text(
                 buildAnnotatedString {
                     append(amount)
                     if (footer is Footer.Of) withStyle(SpanStyle(color = TraceColors.Muted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)) { append(" / " + footer.text) }
                 },
-                style = ts(14, 800, TraceColors.Ink, letterSpacing = -0.3f), maxLines = 1, modifier = Modifier.padding(horizontal = 6.dp),
+                style = ts(14, 800, TraceColors.Ink, letterSpacing = -0.3f), maxLines = 1, modifier = Modifier.padding(horizontal = 10.dp),
             )
         }
     }

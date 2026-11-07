@@ -1,5 +1,6 @@
 package com.homeboundlabs.trace.ui.categories
 
+import com.homeboundlabs.trace.ui.theme.ButtonPadding
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -63,8 +65,8 @@ import kotlinx.coroutines.launch
 fun NewCategoryChip(onClick: () -> Unit) {
     val shape = RoundedCornerShape(20.dp)
     Row(
-        Modifier.height(40.dp).clip(shape).border(1.dp, TraceColors.Border, shape).background(TraceColors.Field)
-            .tap(label = "New category", onClick = onClick).padding(horizontal = 14.dp),
+        Modifier.heightIn(min = 40.dp).clip(shape).border(1.dp, TraceColors.Border, shape).background(TraceColors.Field)
+            .tap(label = "New category", onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -137,8 +139,8 @@ fun CategoryEditor(
                     modifier = Modifier.weight(1f),
                     decorationBox = { inner ->
                         Box(
-                            Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
-                                .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp),
+                            Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
+                                .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp, vertical = 10.dp),
                             contentAlignment = Alignment.CenterStart,
                         ) {
                             if (name.isEmpty()) Text("Name, e.g. Fun, Health, Pets", style = ts(16, 600, TraceColors.Ghost))
@@ -181,15 +183,15 @@ fun CategoryEditor(
             }
 
             Box(
-                Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp))
+                Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(28.dp))
                     .background(if (canSave) TraceColors.Ink else TraceColors.DisabledBg)
-                    .tap(label = "Save category") { save() },
+                    .tap(label = "Save category") { save() }.padding(ButtonPadding),
                 contentAlignment = Alignment.Center,
             ) { Text(if (existing == null) "Add category" else "Save changes", style = ts(16, 700, if (canSave) TraceColors.OnInk else TraceColors.DisabledText)) }
 
             if (onDelete != null) {
                 Box(
-                    Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp)).tap(label = "Delete category", onClick = onDelete),
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).tap(label = "Delete category", onClick = onDelete).padding(ButtonPadding),
                     contentAlignment = Alignment.Center,
                 ) { Text("Delete category", style = ts(15, 700, TraceColors.Negative)) }
             }

@@ -1,5 +1,6 @@
 package com.homeboundlabs.trace.ui.categories
 
+import com.homeboundlabs.trace.ui.theme.ButtonPadding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -95,8 +97,8 @@ fun CategoriesScreen(onBack: () -> Unit) {
             }
             item {
                 Row(
-                    Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
-                        .tap(label = "New category") { creating = true },
+                    Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
+                        .tap(label = "New category") { creating = true }.padding(ButtonPadding),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -161,9 +163,9 @@ private fun DeleteDialog(c: Category, others: List<Category>, count: Int, onDism
                         val on = i == targetIdx
                         val shape = RoundedCornerShape(18.dp)
                         Row(
-                            Modifier.height(36.dp).clip(shape).background(if (on) o.color else TraceColors.Surface)
+                            Modifier.heightIn(min = 36.dp).clip(shape).background(if (on) o.color else TraceColors.Surface)
                                 .border(1.dp, if (on) o.color else TraceColors.Border, shape)
-                                .tap(role = Role.RadioButton, label = o.name) { targetIdx = i }.padding(horizontal = 12.dp),
+                                .tap(role = Role.RadioButton, label = o.name) { targetIdx = i }.padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {

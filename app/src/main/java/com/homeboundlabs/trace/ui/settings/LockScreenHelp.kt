@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -133,8 +134,8 @@ private fun StatusRow(ok: Boolean, title: String, body: String) {
 @Composable
 private fun PillButton(label: String, onClick: () -> Unit) {
     Box(
-        Modifier.height(40.dp).clip(RoundedCornerShape(20.dp)).background(TraceColors.Ink).tap(label = label, onClick = onClick)
-            .padding(horizontal = 16.dp),
+        Modifier.heightIn(min = 40.dp).clip(RoundedCornerShape(20.dp)).background(TraceColors.Ink).tap(label = label, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) { Text(label, style = ts(13, 700, TraceColors.OnInk)) }
 }

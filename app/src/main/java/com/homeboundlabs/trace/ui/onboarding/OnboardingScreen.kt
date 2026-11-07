@@ -1,5 +1,6 @@
 package com.homeboundlabs.trace.ui.onboarding
 
+import com.homeboundlabs.trace.ui.theme.ButtonPadding
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
@@ -37,6 +39,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -219,7 +222,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
 @Composable
 private fun TopBar(pager: PagerState, onSkip: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 22.dp),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 22.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -245,8 +248,8 @@ private fun BottomBar(pager: PagerState, onNext: () -> Unit) {
         Dots(pager)
         val width by animateDpAsState(if (last) 176.dp else 120.dp, tween(Motion.STANDARD, easing = SpringEasing), label = "btn")
         Box(
-            Modifier.width(width).height(56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
-                .tap(label = if (last) "Start tracing" else "Next", onClick = onNext),
+            Modifier.widthIn(min = width).heightIn(min = 56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
+                .tap(label = if (last) "Start tracing" else "Next", onClick = onNext).padding(ButtonPadding),
             contentAlignment = Alignment.Center,
         ) {
             AnimatedContent(
@@ -392,8 +395,8 @@ private fun SetupPage(
                 keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
                 decorationBox = { inner ->
                     Box(
-                        Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
-                            .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp),
+                        Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
+                            .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp, vertical = 10.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
                         if (name.isEmpty()) Text("Your name (optional)", style = ts(16, 600, TraceColors.Ghost))
@@ -411,7 +414,7 @@ private fun SetupPage(
                     val bg by animateColorAsState(if (on) TraceColors.Ink else TraceColors.Surface, label = "cur")
                     val scale by animateFloatAsState(if (on) 1.06f else 1f, tween(Motion.STANDARD, easing = SpringEasing), label = "curScale")
                     Box(
-                        Modifier.scale(scale).size(width = 64.dp, height = 48.dp).clip(RoundedCornerShape(18.dp)).background(bg)
+                        Modifier.scale(scale).widthIn(min = 64.dp).heightIn(min = 48.dp).clip(RoundedCornerShape(18.dp)).background(bg)
                             .border(1.dp, if (on) TraceColors.Ink else TraceColors.Border, RoundedCornerShape(18.dp))
                             .tap(role = Role.RadioButton, label = c) { onCurrency(c) },
                         contentAlignment = Alignment.Center,

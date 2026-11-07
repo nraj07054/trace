@@ -1,5 +1,6 @@
 package com.homeboundlabs.trace.ui.settings
 
+import com.homeboundlabs.trace.ui.theme.ButtonPadding
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,8 +63,8 @@ fun AboutSection() {
                 }
             }
             Row(
-                Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.Accent)
-                    .tap(role = Role.Button, label = "Support Trace on Ko-fi") { openLink(context, KOFI_URL) },
+                Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.Accent)
+                    .tap(role = Role.Button, label = "Support Trace on Ko-fi") { openLink(context, KOFI_URL) }.padding(ButtonPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
