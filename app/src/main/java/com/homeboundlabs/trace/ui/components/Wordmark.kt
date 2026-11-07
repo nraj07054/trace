@@ -18,6 +18,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.homeboundlabs.trace.ui.theme.TraceColors
 import com.homeboundlabs.trace.ui.theme.ts
+import androidx.compose.ui.unit.sp
+import com.homeboundlabs.trace.ui.theme.CapTextScale
 
 // The app icon's dot is 10 units across beside a T 35 units tall, and its bottom sits 1 unit below
 // the T's base. Plus Jakarta Sans at weight 800 has a cap height of 0.745 em, so the same
@@ -34,23 +36,25 @@ private const val DROP_EM = 0.745f * 1f / 35f
 fun Wordmark(fontSize: Int, modifier: Modifier = Modifier) {
     var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     val accent = TraceColors.Accent
-    Text(
-        buildAnnotatedString {
-            append("Trace")
-            withStyle(SpanStyle(color = Color.Transparent)) { append(".") }
-        },
-        style = ts(fontSize, 800, letterSpacing = -0.6f),
-        onTextLayout = { layout = it },
-        modifier = modifier
-            .semantics { contentDescription = "Trace" }
-            .drawWithContent {
-                drawContent()
-                val l = layout ?: return@drawWithContent
-                val em = fontSize.toFloat() * fontScale * density
-                val r = DOT_EM * em / 2
-                val x = l.getBoundingBox(5).center.x
-                val bottom = l.getLineBaseline(0) + DROP_EM * em
-                drawCircle(accent, radius = r, center = Offset(x, bottom - r))
+    CapTextScale {
+        Text(
+            buildAnnotatedString {
+                append("Trace")
+                withStyle(SpanStyle(color = Color.Transparent)) { append(".") }
             },
-    )
+            style = ts(fontSize, 800, letterSpacing = -0.6f),
+            onTextLayout = { layout = it },
+            modifier = modifier
+                .semantics { contentDescription = "Trace" }
+                .drawWithContent {
+                    drawContent()
+                    val l = layout ?: return@drawWithContent
+                    val em = fontSize.sp.toPx()
+                    val r = DOT_EM * em / 2
+                    val x = l.getBoundingBox(5).center.x
+                    val bottom = l.getLineBaseline(0) + DROP_EM * em
+                    drawCircle(accent, radius = r, center = Offset(x, bottom - r))
+                },
+        )
+    }
 }

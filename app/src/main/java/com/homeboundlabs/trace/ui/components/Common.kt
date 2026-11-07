@@ -1,5 +1,7 @@
 package com.homeboundlabs.trace.ui.components
 
+import com.homeboundlabs.trace.ui.theme.TIGHT_TEXT_SCALE
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -70,6 +72,8 @@ fun CategoryTile(expense: Expense) {
 
 @Composable
 fun ExpenseRow(expense: Expense, currency: String, sub: String, modifier: Modifier = Modifier) {
+    // Big text gets a second line instead of cutting the name down to a few letters.
+    val lines = if (LocalDensity.current.fontScale > TIGHT_TEXT_SCALE) 2 else 1
     Row(
         modifier.padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -77,8 +81,8 @@ fun ExpenseRow(expense: Expense, currency: String, sub: String, modifier: Modifi
     ) {
         CategoryTile(expense)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(expense.title, style = ts(15, 600), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(sub, style = ts(12, 400, TraceColors.Muted), maxLines = 1)
+            Text(expense.title, style = ts(15, 600), maxLines = lines, overflow = TextOverflow.Ellipsis)
+            Text(sub, style = ts(12, 400, TraceColors.Muted), maxLines = lines, overflow = TextOverflow.Ellipsis)
         }
         Text("−" + Money.compact(expense.amountMinor, currency), style = ts(15, 700), maxLines = 1)
     }

@@ -1,5 +1,6 @@
 package com.homeboundlabs.trace.ui.permissions
 
+import com.homeboundlabs.trace.ui.theme.ButtonPadding
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -194,8 +196,8 @@ fun PermissionsScreen(onDone: () -> Unit) {
 
         Spacer(Modifier.height(8.dp))
         Box(
-            Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
-                .tap(label = "Continue") { scope.launch { finish() } },
+            Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(28.dp)).background(TraceColors.Ink)
+                .tap(label = "Continue") { scope.launch { finish() } }.padding(ButtonPadding),
             contentAlignment = Alignment.Center,
         ) { Text("Continue", style = ts(16, 700, TraceColors.OnInk)) }
         Text(
@@ -250,12 +252,12 @@ private fun PermissionCard(
         ) { s ->
             when (s) {
                 Status.Ask -> Box(
-                    Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.Ink)
-                        .tap(label = "Allow $title", onClick = onAllow),
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.Ink)
+                        .tap(label = "Allow $title", onClick = onAllow).padding(ButtonPadding),
                     contentAlignment = Alignment.Center,
                 ) { Text("Allow", style = ts(15, 700, TraceColors.OnInk)) }
                 Status.Allowed -> Row(
-                    Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.PositiveBg),
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.PositiveBg).padding(ButtonPadding),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -265,8 +267,8 @@ private fun PermissionCard(
                     Text("Allowed", style = ts(15, 700, TraceColors.Positive))
                 }
                 Status.Declined -> Row(
-                    Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.Field)
-                        .tap(label = "Open settings", onClick = onSettings),
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).background(TraceColors.Field)
+                        .tap(label = "Open settings", onClick = onSettings).padding(ButtonPadding),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) { Text("Not now · Open settings", style = ts(14, 600, TraceColors.Muted)) }

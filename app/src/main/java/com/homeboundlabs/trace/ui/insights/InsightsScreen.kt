@@ -1,5 +1,6 @@
 package com.homeboundlabs.trace.ui.insights
 
+import com.homeboundlabs.trace.ui.theme.ButtonPadding
 import androidx.compose.animation.core.Animatable
 import com.homeboundlabs.trace.ui.theme.EmphasizedEasing
 import com.homeboundlabs.trace.ui.theme.Motion
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -524,8 +526,8 @@ private fun BudgetsSheet(ui: InsightsUi, onPick: (Category) -> Unit, onDismiss: 
                     unset.forEach { r ->
                         val shape = RoundedCornerShape(18.dp)
                         Row(
-                            Modifier.height(40.dp).clip(shape).border(1.dp, TraceColors.Border, shape)
-                                .tap(role = Role.Button, label = "Set a ${r.category.name} budget") { onPick(r.category) }.padding(horizontal = 14.dp),
+                            Modifier.heightIn(min = 40.dp).clip(shape).border(1.dp, TraceColors.Border, shape)
+                                .tap(role = Role.Button, label = "Set a ${r.category.name} budget") { onPick(r.category) }.padding(horizontal = 14.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
@@ -583,14 +585,14 @@ internal fun BudgetSheet(
             }
             Keypad(onKey = { amount = Money.press(amount, it) }, keyColor = TraceColors.Key, textColor = TraceColors.Ink, keyHeight = 50)
             Box(
-                Modifier.fillMaxWidth().height(54.dp).clip(RoundedCornerShape(27.dp))
+                Modifier.fillMaxWidth().heightIn(min = 54.dp).clip(RoundedCornerShape(27.dp))
                     .background(if (minor > 0) TraceColors.Ink else TraceColors.DisabledBg)
-                    .tap(label = "Save budget") { if (minor > 0) onSave(minor) },
+                    .tap(label = "Save budget") { if (minor > 0) onSave(minor) }.padding(ButtonPadding),
                 contentAlignment = Alignment.Center,
             ) { Text(if (current == null) "Set budget" else "Save budget", style = ts(16, 700, if (minor > 0) TraceColors.OnInk else TraceColors.DisabledText)) }
             if (current != null) {
                 Box(
-                    Modifier.fillMaxWidth().height(44.dp).clip(RoundedCornerShape(22.dp)).tap(label = "Remove budget") { onSave(null) },
+                    Modifier.fillMaxWidth().heightIn(min = 44.dp).clip(RoundedCornerShape(22.dp)).tap(label = "Remove budget") { onSave(null) }.padding(ButtonPadding),
                     contentAlignment = Alignment.Center,
                 ) { Text("Remove budget", style = ts(15, 700, TraceColors.Negative)) }
             }

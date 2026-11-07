@@ -1,8 +1,10 @@
 package com.homeboundlabs.trace.ui.add
 
+import com.homeboundlabs.trace.ui.theme.ButtonPadding
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -135,8 +137,8 @@ fun AddScreen(onClose: () -> Unit, editId: Long? = null) {
             Text(if (editId == null) "New expense" else "Edit expense", style = ts(16, 700))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    Modifier.height(36.dp).clip(RoundedCornerShape(18.dp)).background(TraceColors.Fill)
-                        .tap(label = "Change date") { showDate = true }.padding(horizontal = 12.dp),
+                    Modifier.heightIn(min = 36.dp).clip(RoundedCornerShape(18.dp)).background(TraceColors.Fill)
+                        .tap(label = "Change date") { showDate = true }.padding(horizontal = 12.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center,
                 ) { Text(dayLabel(date), style = ts(13, 600)) }
                 if (editId != null) {
@@ -181,8 +183,8 @@ fun AddScreen(onClose: () -> Unit, editId: Long? = null) {
                 keyboardActions = KeyboardActions(onDone = { focus.clearFocus() }),
                 decorationBox = { inner ->
                     Box(
-                        Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
-                            .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp),
+                        Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(16.dp)).background(TraceColors.Field)
+                            .border(1.dp, TraceColors.Border, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp, vertical = 10.dp),
                         contentAlignment = Alignment.CenterStart,
                     ) {
                         if (note.isEmpty()) Text("e.g. Lunch at Café Mocha", style = ts(16, 600, TraceColors.Ghost))
@@ -202,8 +204,8 @@ fun AddScreen(onClose: () -> Unit, editId: Long? = null) {
                 val bg by animateColorAsState(if (on) c.color else TraceColors.Surface, label = "chip")
                 val shape = RoundedCornerShape(20.dp)
                 Row(
-                    Modifier.height(40.dp).clip(shape).background(bg).border(1.dp, if (on) c.color else TraceColors.Border, shape)
-                        .tap(role = Role.RadioButton) { catId = c.id }.padding(horizontal = 14.dp),
+                    Modifier.heightIn(min = 40.dp).clip(shape).background(bg).border(1.dp, if (on) c.color else TraceColors.Border, shape)
+                        .tap(role = Role.RadioButton) { catId = c.id }.padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -224,9 +226,9 @@ fun AddScreen(onClose: () -> Unit, editId: Long? = null) {
 
         val enabled = minor > 0
         Box(
-            Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(28.dp))
+            Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(28.dp))
                 .background(if (enabled) TraceColors.Ink else TraceColors.DisabledBg)
-                .tap(label = "Save expense") { save() },
+                .tap(label = "Save expense") { save() }.padding(ButtonPadding),
             contentAlignment = Alignment.Center,
         ) { Text(if (editId == null) "Save expense" else "Save changes", style = ts(16, 700, if (enabled) TraceColors.OnInk else TraceColors.DisabledText)) }
     }

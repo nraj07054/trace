@@ -1,5 +1,7 @@
 package com.homeboundlabs.trace.ui.theme
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.PaddingValues
 import android.provider.Settings
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.material3.MaterialTheme
@@ -7,6 +9,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -15,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -22,6 +26,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import com.homeboundlabs.trace.R
 
@@ -197,6 +203,32 @@ fun ts(size: Int, weight: Int, color: Color = TraceColors.Ink, letterSpacing: Fl
     lineHeightStyle = if (tight) LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both) else null,
     platformStyle = PlatformTextStyle(includeFontPadding = false),
 )
+
+/**
+ * Room between a button's text and its edges. Buttons keep their minimum height at normal text sizes,
+ * so this only shows once big text outgrows that height, and the text never touches the edge.
+ */
+val ButtonPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp)
+
+/** The most that text in tight, decorative spots grows with the phone's font size. */
+const val TIGHT_TEXT_SCALE = 1.3f
+
+/**
+ * Stops text in [content] growing past [max] times its size, for spots with little room to give
+ * (category cards, chart labels, the logo). Reading text stays uncapped so it follows the phone's setting.
+ */
+@Composable
+fun CapTextScale(max: Float = TIGHT_TEXT_SCALE, content: @Composable () -> Unit) {
+    val current = LocalDensity.current
+    val capped = remember(current, max) {
+        if (current.fontScale <= max) current else Density(current.density, max)
+    }
+    CompositionLocalProvider(LocalDensity provides capped, content = content)
+}
+
+/** [base] grown in step with the current text scale, so a ring or icon stays in proportion to its label. */
+@Composable
+fun scaledWithText(base: Dp): Dp = base * LocalDensity.current.fontScale.coerceAtLeast(1f)
 
 @Composable
 fun rememberReduceMotion(): Boolean {
