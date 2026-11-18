@@ -313,8 +313,10 @@ footer a { color: var(--muted); }
 .testers-head { display: flex; align-items: center; gap: 18px; }
 .testers-ico { flex: none; width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: #fff; color: var(--travel); transform: rotate(-5deg); }
 .testers-ico svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.testers-head b { display: block; font: 800 26px/1.1 var(--display); letter-spacing: -.02em; }
-.testers-head > div > span { display: block; margin-top: 6px; color: var(--muted); } /* the description, not the dot inside the title */
+.t-intro { min-width: 0; }
+.t-badge { display: inline-block; margin: 0 0 8px; padding: 4px 10px; border-radius: 999px; background: #fff; color: var(--travel); font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.t-title { display: block; font: 800 26px/1.1 var(--display); letter-spacing: -.02em; }
+.t-desc { margin: 6px 0 0; color: var(--muted); max-width: 56ch; }
 .t-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: t; }
 .t-steps li { counter-increment: t; background: #fff; border-radius: 22px; padding: 14px 16px; display: grid; grid-template-columns: 34px 1fr auto; gap: 6px 14px; align-items: center; }
 .t-steps li::before { content: counter(t); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; font-weight: 800; font-size: 15px; }
@@ -322,11 +324,17 @@ footer a { color: var(--muted); }
 .t-steps li b { display: block; }
 .t-steps li span { color: var(--muted); font-size: 15px; }
 .t-steps .btn { white-space: nowrap; }
+/* Only step 1 is a solid button; the next steps are lighter so they don't compete with Download APK. */
+.t-steps .btn-line { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
 .testers .note { text-align: right; font-size: 20px; transform: rotate(-1.5deg); }
 @media (max-width: 640px) {
+  .testers-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .testers-ico { width: 48px; height: 48px; border-radius: 15px; }
+  .testers-ico svg { width: 24px; height: 24px; }
+  .t-title { font-size: 24px; }
   .t-steps li { grid-template-columns: 34px 1fr; }
   .t-steps .btn { grid-column: 2; justify-self: start; }
-  .testers .note { text-align: center; }
+  .testers .note { text-align: center; font-size: 17px; }
 }
 
 footer { padding-block: 48px 64px; color: var(--faint); font-size: 14px; }
@@ -597,9 +605,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <div class="testers" id="testers">
         <div class="testers-head">
           <div class="testers-ico" aria-hidden="true"><svg><use href="#i-phone"/></svg></div>
-          <div>
-            <b>Help me test Trace<span class="dot">.</span></b>
-            <span>This is my first app on Google Play, and Google asked me to test it with more people for 14 days first.</span>
+          <div class="t-intro">
+            <p class="t-badge">12 testers · 14 days</p>
+            <b class="t-title">Help me test Trace<span class="dot">.</span></b>
+            <p class="t-desc">Trace is my first app on Google Play. Before it can go live, Google needs people to test it for 14 days. Would you help?</p>
           </div>
         </div>
         <ol class="t-steps">
@@ -609,11 +618,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           </li>
           <li>
             <div><b>Become a tester</b><span>After joining, open the test link and tap “Become a tester”.</span></div>
-            <a class="btn btn-sm" href="https://play.google.com/apps/testing/com.homeboundlabs.trace" target="_blank" rel="noopener" data-goatcounter-click="testers-optin" data-goatcounter-title="Testers (opt in)">Open the test link</a>
+            <a class="btn btn-sm btn-line" href="https://play.google.com/apps/testing/com.homeboundlabs.trace" target="_blank" rel="noopener" data-goatcounter-click="testers-optin" data-goatcounter-title="Testers (opt in)">Open the test link</a>
           </li>
           <li>
-            <div><b>Install it and keep it for 14 days</b><span>Install Trace from Google Play, and open it now and then.</span></div>
-            <a class="btn btn-sm" href="https://play.google.com/store/apps/details?id=com.homeboundlabs.trace" target="_blank" rel="noopener" data-goatcounter-click="testers-play" data-goatcounter-title="Testers (Google Play)">Open Google Play</a>
+            <div><b>Keep it for 14 days</b><span>Install Trace from Google Play and open it now and then.</span></div>
+            <a class="btn btn-sm btn-line" href="https://play.google.com/store/apps/details?id=com.homeboundlabs.trace" target="_blank" rel="noopener" data-goatcounter-click="testers-play" data-goatcounter-title="Testers (Google Play)">Open Google Play</a>
           </li>
         </ol>
         <p class="note">Your feedback is highly appreciated ♡</p>
