@@ -308,6 +308,35 @@ footer a { color: var(--muted); }
 .foot-kofi:hover { color: var(--food); transform: rotate(-3deg) scale(1.05); }
 .foot-kofi svg { width: 14px; height: 14px; fill: var(--food); }
 
+/* ---------- closed-testing call for testers (remove once Trace is live on Google Play) ---------- */
+.testers { margin-top: 18px; padding: clamp(22px, 4vw, 30px); border-radius: 32px; background: #EEF4FF; display: grid; gap: 18px; }
+.testers-head { display: flex; align-items: center; gap: 18px; }
+.testers-ico { flex: none; width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: #fff; color: var(--travel); transform: rotate(-5deg); }
+.testers-ico svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.t-intro { min-width: 0; }
+.t-badge { display: inline-block; margin: 0 0 8px; padding: 4px 10px; border-radius: 999px; background: #fff; color: var(--travel); font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.t-title { display: block; font: 800 26px/1.1 var(--display); letter-spacing: -.02em; }
+.t-desc { margin: 6px 0 0; color: var(--muted); max-width: 56ch; }
+.t-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: t; }
+.t-steps li { counter-increment: t; background: #fff; border-radius: 22px; padding: 14px 16px; display: grid; grid-template-columns: 34px 1fr auto; gap: 6px 14px; align-items: center; }
+.t-steps li::before { content: counter(t); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; font-weight: 800; font-size: 15px; }
+.t-steps li > div { min-width: 0; }
+.t-steps li b { display: block; }
+.t-steps li span { color: var(--muted); font-size: 15px; }
+.t-steps .btn { white-space: nowrap; }
+/* Only step 1 is a solid button; the next steps are lighter so they don't compete with Download APK. */
+.t-steps .btn-line { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.testers .note { text-align: right; font-size: 20px; transform: rotate(-1.5deg); }
+@media (max-width: 640px) {
+  .testers-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .testers-ico { width: 48px; height: 48px; border-radius: 15px; }
+  .testers-ico svg { width: 24px; height: 24px; }
+  .t-title { font-size: 24px; }
+  .t-steps li { grid-template-columns: 34px 1fr; }
+  .t-steps .btn { grid-column: 2; justify-self: start; }
+  .testers .note { text-align: center; font-size: 17px; }
+}
+
 footer { padding-block: 48px 64px; color: var(--faint); font-size: 14px; }
 footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: center; }
 
@@ -573,6 +602,31 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <li><div><b>Open Trace and allow notifications</b><span>That turns on the lock-screen shortcut.</span></div></li>
         </ol>
       </div>
+      <div class="testers" id="testers">
+        <div class="testers-head">
+          <div class="testers-ico" aria-hidden="true"><svg><use href="#i-phone"/></svg></div>
+          <div class="t-intro">
+            <p class="t-badge">12 testers · 14 days</p>
+            <b class="t-title">Help me test Trace<span class="dot">.</span></b>
+            <p class="t-desc">Trace is my first app on Google Play. I'm looking for 12 people to try it for 14 days before it launches. Would you be one of them?</p>
+          </div>
+        </div>
+        <ol class="t-steps">
+          <li>
+            <div><b>Join the testers group</b><span>Use the Google account you use in the Play Store.</span></div>
+            <a class="btn btn-sm" href="https://groups.google.com/g/trace-tester" target="_blank" rel="noopener" data-goatcounter-click="testers-group" data-goatcounter-title="Testers (join group)">Join the group</a>
+          </li>
+          <li>
+            <div><b>Become a tester</b><span>After joining, open the test link and tap “Become a tester”.</span></div>
+            <a class="btn btn-sm btn-line" href="https://play.google.com/apps/testing/com.homeboundlabs.trace" target="_blank" rel="noopener" data-goatcounter-click="testers-optin" data-goatcounter-title="Testers (opt in)">Open the test link</a>
+          </li>
+          <li>
+            <div><b>Keep it for 14 days</b><span>Install Trace from Google Play and open it now and then.</span></div>
+            <a class="btn btn-sm btn-line" href="https://play.google.com/store/apps/details?id=com.homeboundlabs.trace" target="_blank" rel="noopener" data-goatcounter-click="testers-play" data-goatcounter-title="Testers (Google Play)">Open Google Play</a>
+          </li>
+        </ol>
+        <p class="note">Your feedback is highly appreciated ♡</p>
+      </div>
       <div class="kofi">
         <div class="kofi-cup" aria-hidden="true"><span class="steam"><i></i><i></i><i></i></span><svg><use href="#i-cup"/></svg></div>
         <div class="kofi-text">
@@ -831,17 +885,18 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 })();
 </script>
 <script>
-/* Download and Ko-fi taps: let the tap animation finish, then start the download or open Ko-fi. */
+/* Download, Ko-fi and tester-link taps: let the tap animation finish, then start the download or open the link. */
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const WAIT = reduce ? 0 : 600; // a little longer for Ko-fi so the hearts finish
-  const links = document.querySelectorAll('a[href$="/Trace.apk"], a[href^="https://ko-fi.com/"]');
+  const links = document.querySelectorAll('a[href$="/Trace.apk"], a[href^="https://ko-fi.com/"], #testers a');
   links.forEach(a => a.addEventListener('click', e => {
     // Ctrl/Cmd/Shift-clicks keep the browser's own behaviour.
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (a.classList.contains('go')) { e.preventDefault(); return; } // already on its way
     e.preventDefault();
     const kofi = a.href.startsWith('https://ko-fi.com/');
+    const newTab = a.target === '_blank';
     a.classList.add('go');
     if (kofi && !reduce) {
       for (let i = 0; i < 5; i++) {
@@ -855,7 +910,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     setTimeout(() => {
       // Browsers still treat this as part of the tap (well under their ~1s limit). If one
       // blocks the new tab anyway, Ko-fi opens in this tab instead.
-      if (!kofi) location.href = a.href;
+      if (!newTab) location.href = a.href;
       else {
         const tab = window.open(a.href, '_blank');
         if (tab) tab.opener = null; else location.href = a.href;
