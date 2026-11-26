@@ -48,6 +48,24 @@
             android:theme="@style/Theme.Trace.Lock" />
 
         <receiver
+            android:name=".reminders.DueReminderReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".reminders.CheckInReceiver"
+            android:exported="false" />
+
+        <!-- Hands share cards (PNG images) to WhatsApp or any app picked in the share sheet. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <receiver
             android:name=".quickadd.QuickAddReceiver"
             android:exported="true">
             <intent-filter>

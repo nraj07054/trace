@@ -1,0 +1,4 @@
+<resources>
+    <!-- Debug builds sit beside the real app, so they get their own name. -->
+    <string name="app_name">Trace Preview</string>
+</resources>

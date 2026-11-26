@@ -87,6 +87,7 @@ fun InsightsScreen(vm: InsightsViewModel = viewModel()) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val reduceMotion = rememberReduceMotion()
     var editing by remember { mutableStateOf<Editing?>(null) }
+    var recap by remember { mutableStateOf(false) }
 
     Column(
         Modifier.fillMaxSize().background(TraceColors.Surface).statusBarsPadding().navigationBarsPadding()
@@ -120,9 +121,12 @@ fun InsightsScreen(vm: InsightsViewModel = viewModel()) {
                 },
                 onDismissTip = vm::dismissTip,
                 onBudgets = { editing = Editing.List },
+                onRecap = { recap = true },
             )
         }
     }
+
+    if (recap) RecapSheet(ui.month, onDismiss = { recap = false })
 
     when (val e = editing) {
         Editing.List -> BudgetsSheet(ui, onPick = { editing = Editing.One(it.id, null) }, onDismiss = { editing = null })
@@ -153,6 +157,7 @@ private fun MonthBody(
     onTip: (TipAction) -> Unit,
     onDismissTip: (Tip) -> Unit,
     onBudgets: () -> Unit,
+    onRecap: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (ui.loaded && !ui.hasAnyData) {
@@ -173,6 +178,7 @@ private fun MonthBody(
         if (ui.hasAnyData && (ui.budget != null || ui.budgetRows.none { it.limitMinor != null })) {
             BudgetCard(ui, reduceMotion, onBudgets)
         }
+        if (ui.span != null && ui.totalMinor > 0) RecapButton(monthName(ui.month), onRecap)
     }
 }
 
@@ -606,4 +612,22 @@ private fun CatTile(c: Category) {
         Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(c.color.copy(alpha = 0.10f)),
         contentAlignment = Alignment.Center,
     ) { TIcon(TraceIcons.category(c), c.color, 18.dp) }
+}
+
+/** Opens the shareable recap card for the month on screen. */
+@Composable
+private fun RecapButton(month: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(TraceColors.InfoBg)
+            .tap(label = "Share $month recap", onClick = onClick).padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("📊", style = ts(22, 400))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text("Your $month recap", style = ts(15, 700))
+            Text("A shareable card: totals, top categories and habits", style = ts(12, 500, TraceColors.Muted))
+        }
+        Text("›", style = ts(20, 700, TraceColors.Info))
+    }
 }
