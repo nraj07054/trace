@@ -137,6 +137,31 @@ fun SettingsScreen(onBack: () -> Unit, onCategories: () -> Unit) {
             }
         }
 
+        if (currency == "₹") {
+            Section("UPI ID for payment requests") {
+                val upi by app.prefs.upiId.collectAsStateWithLifecycle()
+                var draft by remember { mutableStateOf(upi) }
+                val valid = com.homeboundlabs.trace.data.Upi.isValidId(draft)
+                com.homeboundlabs.trace.ui.components.TextInput(
+                    draft,
+                    {
+                        draft = it.trim().take(60)
+                        // Saved as soon as it looks right; cleared when emptied.
+                        if (com.homeboundlabs.trace.data.Upi.isValidId(draft) || draft.isEmpty()) app.prefs.setUpiId(draft)
+                    },
+                    "yourname@okaxis",
+                    capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.None,
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Email,
+                    error = draft.isNotEmpty() && !valid,
+                )
+                Text(
+                    if (draft.isNotEmpty() && !valid) "That doesn't look like a UPI ID yet (name@bank)."
+                    else "Put on the QR when you ask someone to pay you back. Stored only on this phone.",
+                    style = ts(13, 400, if (draft.isNotEmpty() && !valid) TraceColors.Negative else TraceColors.Muted),
+                )
+            }
+        }
+
         Section("Appearance") {
             val mode by app.prefs.themeMode.collectAsStateWithLifecycle()
             // Intrinsic height keeps the three buttons level when one label wraps at a big font size.

@@ -25,7 +25,12 @@ Built with Kotlin, Jetpack Compose and Room.
 - **Lock-screen quick-add:** a small notification and a Quick Settings tile open the add box over the lock screen, with no unlock needed. A launcher shortcut does the same from the home screen.
 - **Voice add:** tap the mic and say "50 for vada pav". Trace fills in the amount, the note and the category. Speech is recognised on the phone (Android 12+ with an offline language installed); nothing is sent anywhere.
 - **Insights:** highlights, what changed from last month, and monthly budgets per category.
-- **Custom categories**, currency choice (₹ $ € £), and a friendly first-run onboarding and permissions screen.
+- **Habits:** a logging streak (logging an expense or "nothing spent" both count; one missed day a week is forgiven), no-spend days, and a month calendar.
+- **Lend & borrow:** a personal ledger of who owes whom, with partial repayments, settle up and due-day reminders. It never counts as spending.
+- **Payment requests:** a friendly card for WhatsApp with a branded UPI QR (amount filled in), or a full-screen QR to scan in person. Your UPI ID stays on the phone.
+- **Savings goals:** jars that fill as you put money aside.
+- **Monthly recap:** a shareable card with the month's total, top categories and habits.
+- - **Custom categories**, currency choice (₹ $ € £), and a friendly first-run onboarding and permissions screen.
 - **Dark mode:** light, dark or match the phone. Switching to dark plays a sunset (night comes down from the top); switching back plays a sunrise. In dark mode the Home chart becomes a smooth line graph.
 
 **Private by design:** no account, no bank login. The app has no internet permission at all; everything is stored on your phone.

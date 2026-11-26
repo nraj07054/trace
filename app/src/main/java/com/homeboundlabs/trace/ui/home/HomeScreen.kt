@@ -76,7 +76,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun HomeScreen(onSettings: () -> Unit, onSeeAll: () -> Unit, onEdit: (Long) -> Unit, vm: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    onSettings: () -> Unit,
+    onSeeAll: () -> Unit,
+    onEdit: (Long) -> Unit,
+    onHabits: () -> Unit,
+    onPeople: () -> Unit,
+    onGoals: () -> Unit,
+    vm: HomeViewModel = viewModel(),
+) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val reduceMotion = rememberReduceMotion()
     val context = LocalContext.current
@@ -111,6 +119,10 @@ fun HomeScreen(onSettings: () -> Unit, onSeeAll: () -> Unit, onEdit: (Long) -> U
             }
             PeriodPills(ui.period, vm::selectPeriod)
             if (TraceColors.isDark) BudgetRings(ui, vm::selectFilter, setBudget) else CategoryChips(ui, vm::selectFilter, setBudget)
+            Column(Modifier.padding(horizontal = 22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                HabitStrip(onHabits)
+                MoneyTiles(onPeople, onGoals)
+            }
             Recent(ui, onSeeAll, onEdit, Modifier.padding(horizontal = 22.dp))
         }
         StatusBarFade(visible = scroll.value > 0, reduceMotion = reduceMotion)

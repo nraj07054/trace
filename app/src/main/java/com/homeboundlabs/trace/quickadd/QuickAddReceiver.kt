@@ -37,7 +37,12 @@ class QuickAddReceiver : BroadcastReceiver() {
                         kotlinx.coroutines.delay(500)
                         QuickAdd.refresh(context)
                     }
-                    else -> QuickAdd.refresh(context)
+                    else -> {
+                        QuickAdd.refresh(context)
+                        // Alarms don't survive a reboot or an app update.
+                        com.homeboundlabs.trace.reminders.DueReminders.schedule(context)
+                        com.homeboundlabs.trace.reminders.CheckIn.schedule(context)
+                    }
                 }
             } finally {
                 pending.finish()

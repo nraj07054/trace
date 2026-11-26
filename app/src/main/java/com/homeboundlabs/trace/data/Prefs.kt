@@ -81,6 +81,32 @@ class Prefs(context: Context) {
         _dismissedTips.value = next
     }
 
+    private val _upiId = MutableStateFlow(sp.getString(KEY_UPI, "") ?: "")
+    /** The user's own UPI ID, put in the QR on payment requests. Only ever stored on this phone. */
+    val upiId: StateFlow<String> = _upiId.asStateFlow()
+
+    fun setUpiId(value: String) {
+        sp.edit().putString(KEY_UPI, value.trim()).apply(); _upiId.value = value.trim()
+    }
+
+    /** Last message style picked for a payment request (see RequestTone). */
+    var requestTone: String
+        get() = sp.getString(KEY_TONE, "casual") ?: "casual"
+        set(value) = sp.edit().putString(KEY_TONE, value).apply()
+
+    private val _celebrated = MutableStateFlow(sp.getInt(KEY_CELEBRATED, 0))
+    /** The biggest streak milestone already celebrated on Home, so each shows once. */
+    val celebratedMilestone: StateFlow<Int> = _celebrated.asStateFlow()
+
+    fun setCelebratedMilestone(value: Int) {
+        sp.edit().putInt(KEY_CELEBRATED, value).apply(); _celebrated.value = value
+    }
+
+    /** People with a due-date reminder currently scheduled, so stale ones can be cancelled. */
+    var reminderPeople: Set<Long>
+        get() = sp.getStringSet(KEY_REMINDERS, emptySet())!!.mapNotNull { it.toLongOrNull() }.toSet()
+        set(value) = sp.edit().putStringSet(KEY_REMINDERS, value.map { it.toString() }.toSet()).apply()
+
     var onboarded: Boolean
         get() = sp.getBoolean(KEY_ONBOARDED, false)
         set(value) = sp.edit().putBoolean(KEY_ONBOARDED, value).apply()
@@ -106,6 +132,10 @@ class Prefs(context: Context) {
         const val KEY_LOCK_VERIFIED = "lock_verified"
         const val KEY_THEME = "theme"
         const val KEY_DISMISSED_TIPS = "dismissed_tips"
+        const val KEY_UPI = "upi_id"
+        const val KEY_CELEBRATED = "celebrated_milestone"
+        const val KEY_TONE = "request_tone"
+        const val KEY_REMINDERS = "reminder_people"
     }
 }
 

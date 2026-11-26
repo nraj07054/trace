@@ -51,6 +51,10 @@ import com.homeboundlabs.trace.ui.categories.CategoriesScreen
 import com.homeboundlabs.trace.ui.home.HomeScreen
 import com.homeboundlabs.trace.ui.insights.InsightsScreen
 import com.homeboundlabs.trace.ui.onboarding.OnboardingScreen
+import com.homeboundlabs.trace.ui.people.PeopleScreen
+import com.homeboundlabs.trace.ui.goals.GoalsScreen
+import com.homeboundlabs.trace.ui.habits.HabitsScreen
+import com.homeboundlabs.trace.ui.people.PersonScreen
 import com.homeboundlabs.trace.ui.permissions.Permissions
 import com.homeboundlabs.trace.ui.permissions.PermissionsScreen
 import com.homeboundlabs.trace.ui.settings.SettingsScreen
@@ -63,6 +67,7 @@ import com.homeboundlabs.trace.ui.theme.TraceTheme
 
 class MainActivity : ComponentActivity() {
     private val addRequests = mutableIntStateOf(0)
+    private val personRequest = androidx.compose.runtime.mutableLongStateOf(-1L)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +78,7 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) handle(intent)
         setContent {
             ThemeHost(onDark = ::applySystemBars) {
-                TraceTheme { TraceNav(addRequests.intValue) }
+                TraceTheme { TraceNav(addRequests.intValue, personRequest.longValue) { personRequest.longValue = -1L } }
             }
         }
     }
@@ -93,15 +98,17 @@ class MainActivity : ComponentActivity() {
 
     private fun handle(intent: Intent?) {
         if (intent?.getBooleanExtra(EXTRA_OPEN_ADD, false) == true) addRequests.intValue++
+        intent?.getLongExtra(EXTRA_OPEN_PERSON, -1L)?.takeIf { it >= 0 }?.let { personRequest.longValue = it }
     }
 
     companion object {
         const val EXTRA_OPEN_ADD = "open_add"
+        const val EXTRA_OPEN_PERSON = "open_person"
     }
 }
 
 @Composable
-private fun TraceNav(addRequest: Int) {
+private fun TraceNav(addRequest: Int, personRequest: Long, onPersonOpened: () -> Unit) {
     val nav = rememberNavController()
     val context = LocalContext.current
     val app = context.traceApp
@@ -114,6 +121,13 @@ private fun TraceNav(addRequest: Int) {
         QuickAdd.refresh(context)
         // Explain permissions in Trace's own screen first; Android's pop-ups only open from there.
         if (Permissions.shouldShow(context, app.prefs)) nav.navigate("permissions") { launchSingleTop = true }
+    }
+    // A due-date reminder was tapped: open that person.
+    LaunchedEffect(personRequest) {
+        if (personRequest >= 0 && app.prefs.onboarded) {
+            nav.navigate("person/$personRequest") { launchSingleTop = true }
+            onPersonOpened()
+        }
     }
     LaunchedEffect(addRequest) {
         if (addRequest > 0 && app.prefs.onboarded) nav.navigate("add") { launchSingleTop = true }
@@ -176,6 +190,9 @@ private fun TraceNav(addRequest: Int) {
                 onSettings = { goTo(Tab.Settings) },
                 onSeeAll = { nav.navigate("all") { launchSingleTop = true } },
                 onEdit = { id -> nav.navigate("edit/$id") { launchSingleTop = true } },
+                onHabits = { nav.navigate("habits") { launchSingleTop = true } },
+                onPeople = { nav.navigate("people") { launchSingleTop = true } },
+                onGoals = { nav.navigate("goals") { launchSingleTop = true } },
             )
         }
         composable(
@@ -185,6 +202,14 @@ private fun TraceNav(addRequest: Int) {
         ) { AddScreen(onClose = { nav.popBackStack() }) }
         composable("settings") {
             SettingsScreen(onBack = { nav.popBackStack() }, onCategories = { nav.navigate("categories") { launchSingleTop = true } })
+        }
+        composable("habits") { HabitsScreen(onBack = { nav.popBackStack() }) }
+        composable("goals") { GoalsScreen(onBack = { nav.popBackStack() }) }
+        composable("people") {
+            PeopleScreen(onBack = { nav.popBackStack() }, onPerson = { id -> nav.navigate("person/$id") { launchSingleTop = true } })
+        }
+        composable("person/{id}", arguments = listOf(navArgument("id") { type = NavType.LongType })) {
+            PersonScreen(onBack = { nav.popBackStack() })
         }
         composable("permissions") { PermissionsScreen(onDone = { nav.popBackStack() }) }
         composable("categories") { CategoriesScreen(onBack = { nav.popBackStack() }) }

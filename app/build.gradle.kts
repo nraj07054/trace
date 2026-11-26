@@ -36,6 +36,10 @@ android {
     }
 
     buildTypes {
+        // Debug builds install next to the real app ("Trace Preview"), so testing on a phone never touches real data.
+        debug {
+            applicationIdSuffix = ".preview"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -83,6 +87,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.zxing.core)
     testImplementation(libs.junit)
 
 }

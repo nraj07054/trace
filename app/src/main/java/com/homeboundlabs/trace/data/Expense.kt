@@ -71,10 +71,16 @@ interface ExpenseDao {
     suspend fun delete(id: Long)
 }
 
-@Database(entities = [Expense::class, Category::class], version = 4, exportSchema = true)
+@Database(
+    entities = [Expense::class, Category::class, Person::class, LedgerEntry::class, NoSpendDay::class, Goal::class],
+    version = 6, exportSchema = true,
+)
 abstract class TraceDatabase : RoomDatabase() {
     abstract fun expenses(): ExpenseDao
     abstract fun categories(): CategoryDao
+    abstract fun ledger(): LedgerDao
+    abstract fun habits(): HabitDao
+    abstract fun goals(): GoalDao
 }
 
 /** Built-in categories as SQL inserts, used by the v4 migration and by fresh installs. */
@@ -119,5 +125,36 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
                 "`argb` INTEGER NOT NULL, `icon` TEXT NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         )
         insertDefaultCategories(db)
+    }
+}
+
+/** v4 → v5 adds lend/borrow (people + ledger), "nothing spent" days and savings goals. Expenses untouched. */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `people` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`name` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `ledger` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`personId` INTEGER NOT NULL, `amountMinor` INTEGER NOT NULL, `gave` INTEGER NOT NULL, " +
+                "`note` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `dueAt` INTEGER, " +
+                "FOREIGN KEY(`personId`) REFERENCES `people`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_ledger_personId` ON `ledger` (`personId`)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_ledger_createdAt` ON `ledger` (`createdAt`)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `no_spend_days` (`day` INTEGER NOT NULL, PRIMARY KEY(`day`))")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `goals` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`name` TEXT NOT NULL, `targetMinor` INTEGER NOT NULL, `savedMinor` INTEGER NOT NULL, " +
+                "`argb` INTEGER NOT NULL, `icon` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `reachedAt` INTEGER)",
+        )
+    }
+}
+
+/** v5 → v6: goals remember when they were finished, so done ones move to a Completed list. */
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `goals` ADD COLUMN `doneAt` INTEGER")
     }
 }
